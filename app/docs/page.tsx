@@ -255,13 +255,55 @@ export default function DocsPage() {
 
           <Section n="08" id="webhooks" title="Webhooks">
             <P>
-              Instead of polling, register a webhook to receive results. Each delivery is signed: verify{" "}
-              <Mono>X-Signature</Mono> = <Mono>HMAC-SHA256(secret, &quot;&#123;timestamp&#125;.&#123;body&#125;&quot;)</Mono>{" "}
-              against the raw body, and reject deliveries older than 5 minutes.
+              Instead of polling, register a webhook to receive results.{" "}
+              <Mono>POST /api/v1/webhooks</Mono> with your endpoint and the events you want -{" "}
+              <Mono>parse.completed</Mono>, <Mono>parse.failed</Mono>, <Mono>batch.completed</Mono>. The URL must be
+              public HTTPS. The response contains an <Mono>hmac_secret</Mono> that is{" "}
+              <b>shown once and never retrievable again</b> - store it before you close the response.
+            </P>
+            <Code>{`curl -X POST "${API_BASE}/api/v1/webhooks" \\
+  -H "X-API-Key: rp_live_your_key" \\
+  -H "Content-Type: application/json" \\
+  -d '{ "url": "https://your-server.com/hooks/resume",
+        "events": ["parse.completed", "parse.failed"] }'
+
+-> { "webhook_id": "01J3K...", "hmac_secret": "a3f8d2e1c9b7...", "status": "active" }`}</Code>
+            <P>
+              Each delivery is signed: verify <Mono>X-Signature</Mono> ={" "}
+              <Mono>HMAC-SHA256(secret, &quot;&#123;timestamp&#125;.&#123;body&#125;&quot;)</Mono>{" "}
+              against the <b>raw</b> body - not a re-serialized object, which is the most common cause of a
+              mismatch - and reject deliveries older than 5 minutes.
             </P>
             <Code>{`X-Signature: sha256=<hex>
 X-Timestamp: <unix seconds>
-X-Event:     parse.completed`}</Code>
+X-Event:     parse.completed
+
+// Node - verify against the raw body
+const expected = "sha256=" + crypto.createHmac("sha256", secret)
+  .update(\`\${timestamp}.\`).update(rawBody).digest("hex");
+const ok = crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));`}</Code>
+            <Callout>
+              <b>The secret belongs to the registration, not to your account.</b> Registering again - for a new
+              environment, or to re-point an existing one - mints a <b>different</b> secret and leaves the old
+              registration active. Every active registration receives every event it subscribes to, each signed
+              with its own secret, so a stale one keeps receiving parsed candidate data and makes it easy to
+              verify against the wrong secret. There is no rotate endpoint: to change a secret,{" "}
+              <Mono>DELETE /api/v1/webhooks/&#123;webhook_id&#125;</Mono> and register again. When signatures fail,
+              check <Mono>GET /api/v1/webhooks</Mono> first - more registrations than you expect is the usual cause.
+            </Callout>
+            <P>
+              <b>Delivery semantics.</b> Retried up to 3 times (≈2s, 5s, 10s) on 5xx and connection errors;{" "}
+              <b>2xx and 4xx are not retried</b>. A handler that rejects a delivery - a <Mono>401</Mono> from a
+              signature mismatch being the common case - discards that event permanently, so alert on rejections
+              rather than only logging them, and keep polling or a reconcile pass as a backstop. Respond{" "}
+              <Mono>2xx</Mono> quickly and process asynchronously.
+            </P>
+            <P>
+              <b>Ordering.</b> Treat <Mono>parse.completed</Mono> as able to arrive <i>before</i> your own
+              bookkeeping for that <Mono>job_id</Mono> has settled. Persist the <Mono>job_id</Mono> from the submit
+              response first, make the handler tolerate an unknown <Mono>job_id</Mono> (upsert, or buffer and retry
+              the lookup) instead of dropping it, and keep it idempotent - a delivery may arrive more than once.
+            </P>
           </Section>
 
           <Section n="09" id="errors" title="Errors">

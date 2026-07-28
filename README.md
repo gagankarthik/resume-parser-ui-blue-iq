@@ -74,4 +74,14 @@ so Amplify hosts it on managed compute — not as a static export.
 - `/docs` — API usage docs
 - `/signup` — Cognito sign-up + email-code verification
 - `/login` — Cognito sign-in
-- `/dashboard` — generate/revoke API keys, view usage & token stats
+- `/dashboard` — overview: usage & token stats
+- `/dashboard/keys` — generate / revoke API keys
+- `/dashboard/webhooks` — register, list and delete webhook endpoints
+- `/dashboard/analytics` — parse volume and accuracy trends
+- `/dashboard/profile` — account details
+- `/dashboard/admin` — internal only: customers, per-company detail, DynamoDB viewer
+
+> **Webhook secrets are per registration.** The backend mints a fresh `hmac_secret` on every
+> registration and returns it exactly once — there is no rotate endpoint, and every active
+> registration receives every event it subscribes to, each signed with its own secret. Deleting a
+> stale registration is the only way to stop its deliveries; see `/docs` § Webhooks.
