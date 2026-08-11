@@ -14,7 +14,6 @@ type Mode = "user" | "admin";
 // switch; non-admins only ever see USER_NAV (and no switch).
 const USER_NAV: NavItem[] = [
   { href: "/dashboard", label: "Overview", icon: OverviewIcon },
-  { href: "/dashboard/analytics", label: "Analytics", icon: AnalyticsIcon },
   { href: "/dashboard/keys", label: "API Keys", icon: KeyIcon },
   { href: "/dashboard/webhooks", label: "Webhooks", icon: WebhookIcon },
   { href: "/docs", label: "Docs", icon: DocsIcon },
@@ -323,9 +322,6 @@ export function MobileNav({ email, isAdmin }: { email: string; isAdmin?: boolean
 const cls = "h-[18px] w-[18px] shrink-0";
 function OverviewIcon({ active }: { active?: boolean }) {
   return <svg className={cls} viewBox="0 0 24 24" fill="none"><path d="M4 13h7V4H4v9zM13 20h7V4h-7v16zM4 20h7v-4H4v4z" stroke="currentColor" strokeWidth={active ? 1.9 : 1.7} strokeLinejoin="round" /></svg>;
-}
-function AnalyticsIcon({ active }: { active?: boolean }) {
-  return <svg className={cls} viewBox="0 0 24 24" fill="none"><path d="M4 19V5M4 19h16M8 19v-5M12 19V9M16 19v-7M20 19V6" stroke="currentColor" strokeWidth={active ? 1.9 : 1.7} strokeLinecap="round" strokeLinejoin="round" /></svg>;
 }
 /** Three separate pieces, not one doubling-back path: a true circular bow, a
  *  straight shaft starting exactly on the bow's edge, and two teeth square to
