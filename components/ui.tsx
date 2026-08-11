@@ -142,7 +142,7 @@ export function Input({ className, ...rest }: InputHTMLAttributes<HTMLInputEleme
       className={cn(
         "h-11 w-full rounded-xl border border-line-strong bg-paper px-3.5 text-sm text-ink outline-none transition-all",
         "placeholder:text-ink-soft/55 hover:border-line-strong/80",
-        "focus:border-accent-500 focus:bg-surface focus:ring-4 focus:ring-accent-500/10",
+        "focus:border-accent-500 focus:bg-surface focus:ring-[3px] focus:ring-accent-500/15",
         className,
       )}
       {...rest}
@@ -155,7 +155,7 @@ export function Textarea({ className, ...rest }: TextareaHTMLAttributes<HTMLText
     <textarea
       className={cn(
         "w-full rounded-xl border border-line-strong bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition-colors",
-        "placeholder:text-ink-soft/60 focus:border-accent-500 focus:ring-4 focus:ring-accent-500/10",
+        "placeholder:text-ink-soft/60 focus:border-accent-500 focus:ring-[3px] focus:ring-accent-500/15",
         className,
       )}
       {...rest}
@@ -168,7 +168,7 @@ export function Select({ className, children, ...rest }: SelectHTMLAttributes<HT
     <select
       className={cn(
         "h-10 rounded-lg border border-line-strong bg-surface px-3 text-sm text-ink outline-none transition-colors",
-        "focus:border-accent-500 focus:ring-4 focus:ring-accent-500/10",
+        "focus:border-accent-500 focus:ring-[3px] focus:ring-accent-500/15",
         className,
       )}
       {...rest}

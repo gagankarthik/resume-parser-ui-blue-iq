@@ -129,7 +129,11 @@ html {
 }
 
 /* Accent focus ring for inputs/controls. */
-:where(a, button, input, textarea, select):focus-visible {
+/* Links and buttons have no focus style of their own, so they get the ring.
+   Inputs, textareas and selects are excluded on purpose: they already show
+   focus through their own border + soft ring, and stacking a hard 2px outline
+   on top of that is the doubled blue halo it used to draw. */
+:where(a, button):focus-visible {
   outline: 2px solid var(--color-accent-500);
   outline-offset: 2px;
   border-radius: 4px;

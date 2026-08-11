@@ -8,7 +8,6 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 
-import { ApiStatus } from "@/components/dashboard/ApiStatus";
 import { AreaChart, BarList, Donut, StatCard, VIZ, VIZ_STATUS } from "@/components/charts";
 import { ClockIcon, JobsIcon, KeyIcon, ScanIcon, SuccessIcon, TokenIcon, WebhookIcon, DocsIcon } from "@/components/icons";
 import { Button, ErrorBanner, PageHeader, Select, Skeleton } from "@/components/ui";
@@ -86,8 +85,6 @@ export default function DashboardPage() {
           </>
         }
       />
-
-      <ApiStatus />
 
       {error && <ErrorBanner message={error} />}
 
