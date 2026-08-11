@@ -2,29 +2,42 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 import { BrandMark, Logo } from "@/components/ui";
 import { logout } from "@/lib/account";
 
 type NavItem = { href: string; label: string; icon: (p: { active?: boolean }) => React.ReactElement };
-type Mode = "user" | "admin";
 
-// Two completely separate navigations. Admins flip between them with the mode
-// switch; non-admins only ever see USER_NAV (and no switch).
+// One sidebar for everyone. Users see the user section; admins see the same
+// section plus an Admin group beneath it. The old design was two separate navs
+// behind a mode switch, which hid half the app behind a toggle and made "where
+// am I" a question the user had to answer twice.
 const USER_NAV: NavItem[] = [
   { href: "/dashboard", label: "Overview", icon: OverviewIcon },
+  { href: "/dashboard/api", label: "API Endpoints", icon: EndpointIcon },
   { href: "/dashboard/keys", label: "API Keys", icon: KeyIcon },
   { href: "/dashboard/webhooks", label: "Webhooks", icon: WebhookIcon },
   { href: "/docs", label: "Docs", icon: DocsIcon },
 ];
 
 const ADMIN_NAV: NavItem[] = [
-  { href: "/dashboard/admin", label: "Overview", icon: AdminIcon },
+  { href: "/dashboard/admin", label: "Admin overview", icon: AdminIcon },
   { href: "/dashboard/admin/customers", label: "Customers", icon: CustomersIcon },
   { href: "/dashboard/admin/data", label: "Data", icon: DatabaseIcon },
-  { href: "/docs", label: "Docs", icon: DocsIcon },
 ];
+
+function EndpointIcon({ active }: { active?: boolean }) {
+  const w = active ? 1.9 : 1.7;
+  return (
+    <svg className={cls} viewBox="0 0 24 24" fill="none">
+      <circle cx="6" cy="12" r="2.6" stroke="currentColor" strokeWidth={w} />
+      <circle cx="18" cy="6.5" r="2.4" stroke="currentColor" strokeWidth={w} />
+      <circle cx="18" cy="17.5" r="2.4" stroke="currentColor" strokeWidth={w} />
+      <path d="M8.4 10.9 15.7 7.6M8.4 13.1l7.3 3.3" stroke="currentColor" strokeWidth={w} strokeLinecap="round" />
+    </svg>
+  );
+}
 
 function DatabaseIcon({ active }: { active?: boolean }) {
   return (
@@ -35,13 +48,7 @@ function DatabaseIcon({ active }: { active?: boolean }) {
   );
 }
 
-function modeForPath(pathname: string): Mode {
-  return pathname.startsWith("/dashboard/admin") ? "admin" : "user";
-}
 
-function navForMode(mode: Mode): NavItem[] {
-  return mode === "admin" ? ADMIN_NAV : USER_NAV;
-}
 
 function isActive(pathname: string, href: string): boolean {
   // The two section roots ("/dashboard", "/dashboard/admin") match exactly so a
@@ -51,72 +58,38 @@ function isActive(pathname: string, href: string): boolean {
 }
 
 /** Admin-only switch between the user dashboard and the admin console. */
-function ModeSwitch({ mode, collapsed, onNavigate }: { mode: Mode; collapsed?: boolean; onNavigate?: () => void }) {
-  const router = useRouter();
-  function go(target: Mode) {
-    if (target !== mode) router.push(target === "admin" ? "/dashboard/admin" : "/dashboard");
-    onNavigate?.();
-  }
-
-  if (collapsed) {
-    const other: Mode = mode === "admin" ? "user" : "admin";
-    return (
-      <div className="flex justify-center px-2 pt-3">
-        <button
-          onClick={() => go(other)}
-          title={other === "admin" ? "Switch to Admin" : "Switch to User"}
-          aria-label={other === "admin" ? "Switch to Admin" : "Switch to User"}
-          className={
-            "grid h-9 w-9 place-items-center rounded-lg transition-colors " +
-            (mode === "admin" ? "bg-accent-700 text-[var(--surface)]" : "text-ink-soft hover:bg-black/[0.04] hover:text-ink")
-          }
-        >
-          <AdminIcon active={mode === "admin"} />
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="px-3 pt-3">
-      <div className="flex gap-1 rounded-xl border border-line bg-paper p-1">
-        {(["user", "admin"] as Mode[]).map((m) => (
-          <button
-            key={m}
-            onClick={() => go(m)}
-            aria-pressed={mode === m}
-            className={
-              "flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold capitalize transition-colors " +
-              (mode === m ? "bg-accent-700 text-[var(--surface)] shadow-sm" : "text-ink-soft hover:bg-black/[0.04] hover:text-ink")
-            }
-          >
-            {m}
-          </button>
-        ))}
-      </div>
-      <p className="mt-1.5 px-1 text-[10px] text-ink-soft/60">{mode === "admin" ? "Viewing as admin" : "Your account"}</p>
-    </div>
-  );
-}
 
 function NavLinks({
   pathname,
   collapsed,
   onNavigate,
-  items = USER_NAV,
+  isAdmin,
 }: {
   pathname: string;
   collapsed?: boolean;
   onNavigate?: () => void;
-  items?: NavItem[];
+  isAdmin?: boolean;
 }) {
+  const items = isAdmin ? [...USER_NAV, ...ADMIN_NAV] : USER_NAV;
+  const adminStartsAt = USER_NAV.length;
   return (
     <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-      {items.map(({ href, label, icon: Icon }) => {
+      {items.map(({ href, label, icon: Icon }, i) => {
+        const startsAdmin = isAdmin && i === adminStartsAt;
         const active = isActive(pathname, href);
         return (
+          <Fragment key={href}>
+            {startsAdmin && (
+              <div className="pt-4">
+                {!collapsed && (
+                  <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-ink-soft/55">
+                    Admin
+                  </p>
+                )}
+                {collapsed && <div className="mx-3 mb-2 border-t border-line" />}
+              </div>
+            )}
           <Link
-            key={href}
             href={href}
             onClick={onNavigate}
             title={collapsed ? label : undefined}
@@ -137,6 +110,7 @@ function NavLinks({
             </span>
             {!collapsed && <span className="truncate">{label}</span>}
           </Link>
+          </Fragment>
         );
       })}
     </nav>
@@ -196,7 +170,6 @@ function Account({ email, collapsed }: { email: string; collapsed?: boolean }) {
 /** Desktop rail (md+) - collapsible, persisted to localStorage. */
 export function Sidebar({ email, isAdmin }: { email: string; isAdmin?: boolean }) {
   const pathname = usePathname();
-  const mode = modeForPath(pathname);
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
@@ -234,9 +207,7 @@ export function Sidebar({ email, isAdmin }: { email: string; isAdmin?: boolean }
             )}
           </div>
 
-          {isAdmin && <ModeSwitch mode={mode} collapsed={collapsed} />}
-
-          <NavLinks pathname={pathname} collapsed={collapsed} items={navForMode(mode)} />
+          <NavLinks pathname={pathname} collapsed={collapsed} isAdmin={isAdmin} />
 
           {collapsed && (
             <div className="flex shrink-0 justify-center pb-1">
@@ -263,7 +234,6 @@ export function Sidebar({ email, isAdmin }: { email: string; isAdmin?: boolean }
 /** Mobile hamburger + slide-over drawer. */
 export function MobileNav({ email, isAdmin }: { email: string; isAdmin?: boolean }) {
   const pathname = usePathname();
-  const mode = modeForPath(pathname);
   const [open, setOpen] = useState(false);
 
   useEffect(() => setOpen(false), [pathname]);
@@ -308,8 +278,7 @@ export function MobileNav({ email, isAdmin }: { email: string; isAdmin?: boolean
                 </svg>
               </button>
             </div>
-            {isAdmin && <ModeSwitch mode={mode} onNavigate={() => setOpen(false)} />}
-            <NavLinks pathname={pathname} onNavigate={() => setOpen(false)} items={navForMode(mode)} />
+            <NavLinks pathname={pathname} onNavigate={() => setOpen(false)} isAdmin={isAdmin} />
             <Account email={email} />
           </div>
         </div>
