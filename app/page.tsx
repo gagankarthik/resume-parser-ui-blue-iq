@@ -874,43 +874,71 @@ function Cta() {
     <section id="demo" className="bg-paper" aria-label="Get started">
       <div className="mx-auto max-w-7xl px-5 py-20 sm:px-6 lg:py-24">
         <Reveal>
+          {/* Same card as the feature panels - radial gradient from the top,
+              20px radius, ring instead of border - so the page closes in the
+              language it spent the whole scroll establishing. Split rather than
+              centred: the copy asks, the mock-up shows what the answer looks
+              like. */}
           <div
-            className="relative overflow-hidden rounded-[26px] bg-[#f7f9fc] px-8 py-16 text-center sm:px-14 lg:py-20"
+            className="grid items-center gap-10 overflow-hidden rounded-[20px] px-8 py-14 sm:px-12 lg:grid-cols-[1.05fr_0.95fr] lg:px-14 lg:py-16"
             style={{
-              border: "1.6px solid rgba(255,255,255,.92)",
-              boxShadow: "0 2px 16px rgba(24,30,45,.045)",
+              background: G_LIME,
+              boxShadow: "0 10px 30px -10px rgba(0,0,0,0.1)",
             }}
           >
-            <span
-              className="relative inline-flex h-[31px] items-center rounded-full bg-white/90 px-[15px] text-[12px] font-bold tracking-[-0.01em] text-[#111] backdrop-blur-[7px]"
-              style={{ boxShadow: "0 0 0 3px rgba(0,0,0,.047)" }}
-            >
-              Live, on your files
-            </span>
-
-            <h2 className="mx-auto mt-6 max-w-3xl font-display text-[2.35rem] font-extrabold leading-[1.08] tracking-[-0.032em] text-balance text-[#15201a] sm:text-[3rem]">
-              Send us your worst document.
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-[#1e2a1b]/75">
-              The messy scan. The seven-page contract. The resume with three job titles crammed
-              into one line. We will run it live and show you exactly what comes back.
-            </p>
-
-            <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-              <a
-                href={DEMO_URL}
-                className="group inline-flex items-center gap-2 rounded-lg bg-accent-700 px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-accent-800"
-              >
-                Talk to us
-                <Arrow />
-              </a>
-              <Link
-                href="/docs"
-                className="inline-flex items-center gap-2 rounded-lg bg-white px-7 py-3.5 text-sm font-semibold text-[#151515] transition-colors hover:bg-white/80"
+            <div>
+              <span
+                className="inline-flex h-[30px] items-center rounded-full bg-white px-[14px] text-[12px] font-semibold text-[#1e293b]"
                 style={{ boxShadow: "0 0 0 3px rgba(0,0,0,.047)" }}
               >
-                Read the docs
-              </Link>
+                Live, on your files
+              </span>
+
+              <h2 className="mt-5 font-display text-[2.1rem] font-extrabold leading-[1.1] tracking-[-0.032em] text-[#15201a] sm:text-[2.5rem]">
+                Send us your worst document.
+              </h2>
+              <p className="mt-4 max-w-lg text-[16.5px] leading-relaxed text-[#1e2a1b]/75">
+                The messy scan. The seven-page contract. The resume with three job titles crammed
+                into one line. We will run it live and show you exactly what comes back.
+              </p>
+
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <a
+                  href={DEMO_URL}
+                  className="group inline-flex items-center gap-2 rounded-lg bg-accent-700 px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-accent-800"
+                >
+                  Talk to us
+                  <Arrow />
+                </a>
+                <Link
+                  href="/docs"
+                  className="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3.5 text-sm font-semibold text-[#151515] transition-colors hover:bg-white/80"
+                  style={{ boxShadow: "0 0 0 3px rgba(0,0,0,.047)" }}
+                >
+                  Read the docs
+                </Link>
+              </div>
+            </div>
+
+            {/* What "comes back" actually looks like - the same mock-up idiom
+                the feature panels use, so the promise is shown, not just said. */}
+            <div className="rounded-xl bg-white p-5" style={{ boxShadow: "0 8px 20px rgba(0,0,0,.05)" }}>
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[11px] text-[#64748b]">contract.pdf</span>
+                <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-[#5f8b3e]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#5f8b3e]" />
+                  completed
+                </span>
+              </div>
+              <div className="mt-4 space-y-3">
+                <MockField label="counterparty" value="Fort Sanders Regional" score={0.96} />
+                <MockField label="governing_law" value="Tennessee" score={0.91} />
+                <MockField label="term_end" value="2027-06-30" score={0.88} />
+                <MockField label="auto_renew" value="null" score={0.0} />
+              </div>
+              <p className="mt-4 font-mono text-[10.5px] text-[#94a3b8]">
+                1 field flagged - nothing invented
+              </p>
             </div>
           </div>
         </Reveal>
