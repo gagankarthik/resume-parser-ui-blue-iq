@@ -150,7 +150,7 @@ export default function CompanyDetailClient({ companyId }: { companyId: string }
               <div className="mt-2 space-y-0.5 text-sm text-ink-soft">
                 <div>{c.email || "-"}</div>
                 <div className="font-mono text-xs text-ink-soft/70">
-                  {c.company_id}{c.created_at ? ` · joined ${c.created_at.slice(0, 10)}` : ""}
+                  {c.company_id}{c.created_at ? ` - joined ${c.created_at.slice(0, 10)}` : ""}
                 </div>
               </div>
             </div>
@@ -201,9 +201,9 @@ export default function CompanyDetailClient({ companyId }: { companyId: string }
 
           {/* Usage */}
           <div className="grid gap-4 sm:grid-cols-3">
-            <StatCard label={`Jobs · ${days}d`} value={t!.jobs.toLocaleString()} accent="ink" icon={<JobsIcon />} />
+            <StatCard label={`Jobs - ${days}d`} value={t!.jobs.toLocaleString()} accent="ink" icon={<JobsIcon />} />
             <StatCard label="Tokens used" value={t!.tokens_used.toLocaleString()} accent="brass" icon={<TokenIcon />} />
-            <StatCard label="Success rate" value={`${successRate}%`} sub={`${t!.completed} ok · ${t!.failed} failed`} accent={successRate >= 90 ? "accent" : successRate >= 70 ? "amber" : "rose"} icon={<SuccessIcon />} />
+            <StatCard label="Success rate" value={`${successRate}%`} sub={`${t!.completed} ok - ${t!.failed} failed`} accent={successRate >= 90 ? "accent" : successRate >= 70 ? "amber" : "rose"} icon={<SuccessIcon />} />
           </div>
 
           {/* API keys - with per-key usage rolled up from recent activity */}
@@ -295,7 +295,7 @@ export default function CompanyDetailClient({ companyId }: { companyId: string }
                     {detail.logs.map((l) => (
                       <TR key={l.job_id}>
                         <TD className="font-mono text-xs text-ink-soft">{l.timestamp ? l.timestamp.slice(0, 19).replace("T", " ") : "-"}</TD>
-                        <TD className="text-ink-soft">{l.file_type}{l.ocr_used ? " · OCR" : ""}</TD>
+                        <TD className="text-ink-soft">{l.file_type}{l.ocr_used ? " - OCR" : ""}</TD>
                         <TD>
                           <Badge tone={l.status === "completed" ? "success" : l.status === "failed" ? "danger" : "neutral"}>{l.status}</Badge>
                         </TD>

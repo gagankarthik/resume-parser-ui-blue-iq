@@ -1,5 +1,5 @@
-// Blue-IQ icon set — hand-drawn, not an icon-font dependency: 24px viewBox, 20px
-// default render, currentColor, 1.7–1.8 stroke. Keeping one weight across the
+// Blue-IQ icon set - hand-drawn, not an icon-font dependency: 24px viewBox, 20px
+// default render, currentColor, 1.7-1.8 stroke. Keeping one weight across the
 // whole set is what makes them read as a family next to the sidebar and nav marks.
 //
 // Mirrored in the other app so both read as one product; add new icons here
@@ -16,9 +16,9 @@ function Svg({ children, ...props }: IconProps & { children: React.ReactNode }) 
   );
 }
 
-/* ── Domain ────────────────────────────────────────────────────────────────── */
+/* -- Domain ------------------------------------------------------------------ */
 
-/** API key — used wherever keys are surfaced (stat cards, headers).
+/** API key - used wherever keys are surfaced (stat cards, headers).
  *
  *  Built from three separate pieces rather than one doubling-back path: the bow
  *  is a true circle, the shaft is a straight diagonal that starts exactly on the
@@ -35,7 +35,7 @@ export function KeyIcon(props: IconProps) {
   );
 }
 
-/** Jobs processed — stacked layers. */
+/** Jobs processed - stacked layers. */
 export function JobsIcon(props: IconProps) {
   return (
     <Svg {...props}>
@@ -45,7 +45,7 @@ export function JobsIcon(props: IconProps) {
   );
 }
 
-/** Tokens — sparkle. */
+/** Tokens - sparkle. */
 export function TokenIcon(props: IconProps) {
   return (
     <Svg {...props}>
@@ -54,7 +54,7 @@ export function TokenIcon(props: IconProps) {
   );
 }
 
-/** Success / completed — check in a circle. */
+/** Success / completed - check in a circle. */
 export function SuccessIcon(props: IconProps) {
   return (
     <Svg {...props}>
@@ -64,7 +64,7 @@ export function SuccessIcon(props: IconProps) {
   );
 }
 
-/** Processing time — clock. */
+/** Processing time - clock. */
 export function ClockIcon(props: IconProps) {
   return (
     <Svg {...props}>
@@ -74,7 +74,7 @@ export function ClockIcon(props: IconProps) {
   );
 }
 
-/** Users / companies — people. */
+/** Users / companies - people. */
 export function UsersIcon(props: IconProps) {
   return (
     <Svg {...props}>
@@ -84,7 +84,7 @@ export function UsersIcon(props: IconProps) {
   );
 }
 
-/** OCR / scanned documents — scan frame. */
+/** OCR / scanned documents - scan frame. */
 export function ScanIcon(props: IconProps) {
   return (
     <Svg {...props}>
@@ -94,7 +94,7 @@ export function ScanIcon(props: IconProps) {
   );
 }
 
-/** Webhooks — a branching delivery hook. */
+/** Webhooks - a branching delivery hook. */
 export function WebhookIcon(props: IconProps) {
   return (
     <Svg {...props}>
@@ -106,7 +106,7 @@ export function WebhookIcon(props: IconProps) {
   );
 }
 
-/** Documentation — an open book. */
+/** Documentation - an open book. */
 export function DocsIcon(props: IconProps) {
   return (
     <Svg {...props}>
@@ -116,7 +116,7 @@ export function DocsIcon(props: IconProps) {
   );
 }
 
-/** Admin / permissions — shield. */
+/** Admin / permissions - shield. */
 export function ShieldIcon(props: IconProps) {
   return (
     <Svg {...props}>
@@ -126,7 +126,7 @@ export function ShieldIcon(props: IconProps) {
   );
 }
 
-/** Upload / drop a résumé. */
+/** Upload / drop a resume. */
 export function UploadIcon(props: IconProps) {
   return (
     <Svg {...props}>
@@ -136,7 +136,7 @@ export function UploadIcon(props: IconProps) {
   );
 }
 
-/** Analytics — bar chart. */
+/** Analytics - bar chart. */
 export function ChartIcon(props: IconProps) {
   return (
     <Svg {...props}>
@@ -146,7 +146,7 @@ export function ChartIcon(props: IconProps) {
   );
 }
 
-/** Latency / throughput — gauge. */
+/** Latency / throughput - gauge. */
 export function GaugeIcon(props: IconProps) {
   return (
     <Svg {...props}>
@@ -157,7 +157,7 @@ export function GaugeIcon(props: IconProps) {
   );
 }
 
-/** Errors — alert triangle. */
+/** Errors - alert triangle. */
 export function AlertIcon(props: IconProps) {
   return (
     <Svg {...props}>
@@ -166,7 +166,7 @@ export function AlertIcon(props: IconProps) {
   );
 }
 
-/** Stored records — database. */
+/** Stored records - database. */
 export function DatabaseIcon(props: IconProps) {
   return (
     <Svg {...props}>
@@ -177,7 +177,7 @@ export function DatabaseIcon(props: IconProps) {
   );
 }
 
-/* ── Interface ─────────────────────────────────────────────────────────────── */
+/* -- Interface --------------------------------------------------------------- */
 
 export function RefreshIcon(props: IconProps) {
   return (

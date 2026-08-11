@@ -1,18 +1,18 @@
 "use client";
 
-// Blue-IQ chart primitives — dependency-free SVG + CSS.
+// Blue-IQ chart primitives - dependency-free SVG + CSS.
 //
 // Mirrored in the other app so both read as one product. The conventions below
 // are deliberate, not taste:
 //   * Series colour comes from the --viz-N tokens in FIXED order and is never
 //     cycled or reassigned by rank, so filtering a series never repaints the
 //     survivors. The palette is validated (lightness, chroma, CVD separation,
-//     contrast) — see tokens.css before changing a value.
-//   * One axis. Never two y-scales on one plot; two measures → two charts.
-//   * Every plot ships a hover layer (crosshair/tooltip), and ≥2 series always
+//     contrast) - see tokens.css before changing a value.
+//   * One axis. Never two y-scales on one plot; two measures -> two charts.
+//   * Every plot ships a hover layer (crosshair/tooltip), and >=2 series always
 //     carry a legend, so identity is never colour-alone.
 //   * Text wears ink tokens, never the series colour; grid/axes stay recessive.
-// ═════════════════════════════════════════════════════════════════════════════
+// =============================================================================
 
 import { useId, useRef, useState } from "react";
 import type { ReactNode } from "react";
@@ -27,7 +27,7 @@ export const VIZ = [
   "var(--viz-6)",
 ] as const;
 
-/** Reserved state colours — never reused as "series 7". */
+/** Reserved state colours - never reused as "series 7". */
 export const VIZ_STATUS = {
   good: "var(--viz-good)",
   warning: "var(--viz-warning)",
@@ -57,7 +57,7 @@ function Frame({ title, aside, children }: { title?: string; aside?: ReactNode; 
   );
 }
 
-/** Legend — always rendered for ≥2 series. */
+/** Legend - always rendered for >=2 series. */
 export function Legend({ items }: { items: { label: string; color: string }[] }) {
   return (
     <ul className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
@@ -71,9 +71,9 @@ export function Legend({ items }: { items: { label: string; color: string }[] })
   );
 }
 
-/* ── Stat tile ─────────────────────────────────────────────────────────────── */
+/* -- Stat tile --------------------------------------------------------------- */
 
-/** Named accents kept for call-site convenience — each resolves to a validated
+/** Named accents kept for call-site convenience - each resolves to a validated
  *  token, so no page hardcodes a hex. `color` overrides when a series colour is
  *  needed instead (e.g. a tile that matches a line on a chart below it). */
 const ACCENTS: Record<string, string> = {
@@ -125,7 +125,7 @@ export function StatCard({
   );
 }
 
-/* ── Sparkline ─────────────────────────────────────────────────────────────── */
+/* -- Sparkline --------------------------------------------------------------- */
 
 export function Sparkline({ data, color = VIZ[0], className = "h-8 w-24" }: { data: number[]; color?: string; className?: string }) {
   if (data.length < 2) return <span className={className} />;
@@ -144,7 +144,7 @@ export function Sparkline({ data, color = VIZ[0], className = "h-8 w-24" }: { da
   );
 }
 
-/* ── Time series ───────────────────────────────────────────────────────────── */
+/* -- Time series ------------------------------------------------------------- */
 
 export interface Point {
   date: string;
@@ -182,7 +182,7 @@ export function AreaChart({ data, label, color = VIZ[0], format }: { data: Point
       aside={
         hover !== null && data[hover] ? (
           <span className="font-mono text-xs text-ink-soft">
-            {data[hover].date} · <b className="text-ink">{fmt(data[hover].value)}</b>
+            {data[hover].date} - <b className="text-ink">{fmt(data[hover].value)}</b>
           </span>
         ) : null
       }
@@ -222,7 +222,7 @@ export interface Series {
   points: Point[];
 }
 
-/** Multi-series line chart — one y-axis, legend always present, shared crosshair. */
+/** Multi-series line chart - one y-axis, legend always present, shared crosshair. */
 export function LineChart({ series, label, format }: { series: Series[]; label: string; format?: (n: number) => string }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<number | null>(null);
@@ -321,7 +321,7 @@ export function BarChart({ data, label, color = VIZ[0], format }: { data: Point[
       aside={
         hover !== null && data[hover] ? (
           <span className="font-mono text-xs text-ink-soft">
-            {data[hover].date} · <b className="text-ink">{fmt(data[hover].value)}</b>
+            {data[hover].date} - <b className="text-ink">{fmt(data[hover].value)}</b>
           </span>
         ) : null
       }
@@ -361,9 +361,9 @@ export function BarChart({ data, label, color = VIZ[0], format }: { data: Point[
   );
 }
 
-/* ── Share / identity ──────────────────────────────────────────────────────── */
+/* -- Share / identity -------------------------------------------------------- */
 
-/** Interactive donut — hover a segment or legend row to focus it. */
+/** Interactive donut - hover a segment or legend row to focus it. */
 export function Donut({
   title,
   segments,
@@ -442,7 +442,7 @@ export function Donut({
   );
 }
 
-/** Ranked horizontal bars — hover a row to reveal its share. */
+/** Ranked horizontal bars - hover a row to reveal its share. */
 export function BarList({ title, items, color = VIZ[0] }: { title: string; items: { label: string; value: number }[]; color?: string }) {
   const [active, setActive] = useState<number | null>(null);
   const max = Math.max(1, ...items.map((i) => i.value));

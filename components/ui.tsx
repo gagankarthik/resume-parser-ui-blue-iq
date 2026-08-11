@@ -2,7 +2,7 @@
 // no external deps.
 //
 // The product platform and the UAT console keep their own copies of these
-// primitives on purpose — each app stays self-contained — but they are written to
+// primitives on purpose - each app stays self-contained - but they are written to
 // LOOK identical. If you change a primitive's appearance here, mirror it in the
 // other app so the two keep reading as one product.
 "use client";
@@ -21,9 +21,9 @@ export function cn(...parts: Array<string | false | null | undefined>): string {
   return parts.filter(Boolean).join(" ");
 }
 
-/* ── Brand ─────────────────────────────────────────────────────────────────── */
+/* -- Brand ------------------------------------------------------------------- */
 
-/** Brand monogram — a document being parsed into structured lines. */
+/** Brand monogram - a document being parsed into structured lines. */
 export function BrandMark({ className = "h-9 w-9" }: { className?: string }) {
   return (
     <span
@@ -47,20 +47,20 @@ export function Wordmark({ className, suffix }: { className?: string; suffix?: s
     <span className={cn("flex items-center gap-2.5", className)}>
       <BrandMark className="h-8 w-8" />
       <span className="font-display text-[1.05rem] font-semibold tracking-tight text-ink">
-        Blue<span className="text-accent-700">·</span>IQ Parser
+        Blue<span className="text-accent-700">-</span>IQ Parser
         {suffix && <span className="ml-1.5 font-sans text-sm font-normal text-ink-soft">{suffix}</span>}
       </span>
     </span>
   );
 }
 
-/** Real brand lockup (public/logo.svg) — use wherever the logo should appear. */
+/** Real brand lockup (public/logo.svg) - use wherever the logo should appear. */
 export function Logo({ className = "h-7 w-auto" }: { className?: string }) {
   // eslint-disable-next-line @next/next/no-img-element
   return <img src="/logo.svg" alt="Blue-IQ" className={className} />;
 }
 
-/* ── Surfaces ──────────────────────────────────────────────────────────────── */
+/* -- Surfaces ---------------------------------------------------------------- */
 
 export function Card({ children, className }: { children: ReactNode; className?: string }) {
   return (
@@ -105,7 +105,7 @@ export function PageHeader({
   );
 }
 
-/* ── Controls ──────────────────────────────────────────────────────────────── */
+/* -- Controls ---------------------------------------------------------------- */
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary" | "danger" | "ghost";
@@ -193,7 +193,7 @@ export function Spinner({ className }: { className?: string }) {
   );
 }
 
-/* ── Status ────────────────────────────────────────────────────────────────── */
+/* -- Status ------------------------------------------------------------------ */
 
 export function Badge({
   children,
@@ -221,7 +221,7 @@ export function Badge({
   );
 }
 
-/** Job/run state as a labelled dot — state is never carried by colour alone. */
+/** Job/run state as a labelled dot - state is never carried by colour alone. */
 export function StatusDot({ state }: { state: "completed" | "partial" | "failed" | "processing" | "queued" }) {
   const map: Record<string, { tone: string; label: string }> = {
     completed: { tone: "bg-[var(--viz-good)]", label: "Completed" },
@@ -254,16 +254,23 @@ export function EmptyState({
   title,
   hint,
   action,
+  className,
 }: {
   title: string;
   hint?: string;
   action?: ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="grid place-items-center gap-2 px-6 py-12 text-center">
-      <p className="font-display text-sm font-semibold text-ink">{title}</p>
-      {hint && <p className="max-w-sm text-sm text-ink-soft">{hint}</p>}
-      {action && <div className="mt-2">{action}</div>}
+    <div
+      className={cn(
+        "flex min-h-[14rem] flex-col items-center justify-center rounded-2xl border border-dashed border-line-strong p-6 text-center",
+        className,
+      )}
+    >
+      <p className="text-sm font-medium text-ink">{title}</p>
+      {hint && <p className="mt-1 max-w-sm text-sm text-ink-soft">{hint}</p>}
+      {action && <div className="mt-3">{action}</div>}
     </div>
   );
 }
@@ -272,14 +279,81 @@ export function Skeleton({ className }: { className?: string }) {
   return <div className={cn("animate-pulse rounded-md bg-black/[0.06]", className)} aria-hidden />;
 }
 
-/* ── Data tables ───────────────────────────────────────────────────────────────
+export function BackButton({ onClick, label = "Back", className }: { onClick: () => void; label?: string; className?: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-ink-soft transition-colors hover:bg-black/[0.04] hover:text-ink",
+        className,
+      )}
+    >
+      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      {label}
+    </button>
+  );
+}
+
+export function Tabs<T extends string>({
+  value,
+  onChange,
+  options,
+  className,
+}: {
+  value: T;
+  onChange: (v: T) => void;
+  options: { id: T; label: string; badge?: number }[];
+  className?: string;
+}) {
+  return (
+    <div
+      role="tablist"
+      className={cn(
+        "scroll-fine flex max-w-full gap-0.5 overflow-x-auto rounded-lg border border-line-strong p-0.5",
+        className,
+      )}
+    >
+      {options.map((o) => {
+        const active = o.id === value;
+        return (
+          <button
+            key={o.id}
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(o.id)}
+            className={cn(
+              "flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+              active ? "bg-accent-700 text-[var(--surface)]" : "text-ink-soft hover:bg-black/[0.04] hover:text-ink",
+            )}
+          >
+            {o.label}
+            {typeof o.badge === "number" && o.badge > 0 && (
+              <span
+                className={cn(
+                  "rounded-full px-1.5 text-[10px] font-semibold",
+                  active ? "bg-white/20" : "bg-black/[0.06]",
+                )}
+              >
+                {o.badge}
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* -- Data tables ---------------------------------------------------------------
    A table is the densest thing on any of these screens, so the primitives carry
    the rules rather than each page re-inventing them: the wrapper is the ONLY
    horizontally-scrolling element (the page body never scrolls sideways on
    mobile), the header is sticky, numerics are tabular and right-aligned, and
-   rows are separated by hairlines rather than zebra fills. ──────────────────── */
+   rows are separated by hairlines rather than zebra fills. -------------------- */
 
-/** Scroll container + frame — for a table that stands on its own. */
+/** Scroll container + frame - for a table that stands on its own. */
 export function TableWrap({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div className={cn("overflow-hidden rounded-2xl border border-line bg-surface", className)}>
@@ -288,7 +362,7 @@ export function TableWrap({ children, className }: { children: ReactNode; classN
   );
 }
 
-/** Scroll container WITHOUT a frame — for a table already inside a <Card>, so
+/** Scroll container WITHOUT a frame - for a table already inside a <Card>, so
  *  the card supplies the only border. Bleeds to the card's edges on small
  *  screens so the scrollable region spans the full width. */
 export function TableScroll({ children, className }: { children: ReactNode; className?: string }) {

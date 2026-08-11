@@ -55,7 +55,7 @@ export default function CustomersClient() {
             <UsersIcon className="h-5 w-5" />
           </span>
           <div>
-            <p className="label-caps text-accent-700">Platform · Admin</p>
+            <p className="label-caps text-accent-700">Platform - Admin</p>
             <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight text-ink">Customers</h1>
             <p className="mt-1 text-sm text-ink-soft">Every organisation, its usage, and account controls.</p>
           </div>

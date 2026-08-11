@@ -28,7 +28,7 @@ export const metadata = {
   ],
   alternates: { canonical: "/docs" },
   openGraph: {
-    title: "API documentation · Blue-IQ Capture",
+    title: "API documentation - Blue-IQ Capture",
     description:
       "Authenticate, submit a document, poll for structured JSON. The full Blue-IQ Capture API reference.",
     url: "/docs",
@@ -166,10 +166,10 @@ export default function DocsPage() {
                 ["data.licenses[]", "State licences with license_number, state, status, and compact flag - kept separate from certifications"],
                 ["data.certifications[]", "Time-limited certifications (BLS, ACLS, CCRN...) with issuer and dates"],
                 ["data.professional_associations[]", "Society / honor-society memberships, committees, and collaboratives (Sigma Theta Tau, unit committees...)"],
-                ["data.awards[] · publications[]", "Awards and academic honors (Summa Cum Laude...); publications as citation strings"],
+                ["data.awards[] - publications[]", "Awards and academic honors (Summa Cum Laude...); publications as citation strings"],
                 ["confidence", "Per-section + overall scores, 0-1"],
                 ["skills_validation", "Taxonomy match ratio and recognized / unrecognized split"],
-                ["partial · warnings", "partial=true flags a degraded record; warnings[] explains what to review (e.g. no email detected on a low-quality scan, or a name that looks truncated vs the email)"],
+                ["partial - warnings", "partial=true flags a degraded record; warnings[] explains what to review (e.g. no email detected on a low-quality scan, or a name that looks truncated vs the email)"],
               ]}
             />
             <P>
@@ -191,7 +191,7 @@ export default function DocsPage() {
             <Code>{`"specialties": [
   {
     "name":         "ICU",        // platform's exact name, preserved
-    "raw":          "ICU",        // original text as written on the résumé
+    "raw":          "ICU",        // original text as written on the resume
     "specialty_id": "56",         // platform id - null when unmatched
     "group":        "ICU",
     "confidence":   1.0,          // 0-1 certainty of the id
@@ -339,10 +339,10 @@ const ok = crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature))
             <Table
               head={["HTTP", "error_code"]}
               rows={[
-                ["401 / 403", "MISSING_API_KEY · INVALID_API_KEY · REVOKED_API_KEY"],
-                ["413 / 415", "FILE_TOO_LARGE · UNSUPPORTED_FILE_TYPE"],
+                ["401 / 403", "MISSING_API_KEY - INVALID_API_KEY - REVOKED_API_KEY"],
+                ["413 / 415", "FILE_TOO_LARGE - UNSUPPORTED_FILE_TYPE"],
                 ["404", "JOB_NOT_FOUND"],
-                ["500", "PARSE_FAILED · EXTRACTION_FAILED · OCR_FAILED"],
+                ["500", "PARSE_FAILED - EXTRACTION_FAILED - OCR_FAILED"],
                 ["failed job (poll)", "WORKER_DISPATCH_FAILED - async processing could not start; retry the upload"],
               ]}
             />
@@ -413,7 +413,7 @@ print(job["data"] if job["status"] == "completed" else job["error"])`}</Code>
   );
 }
 
-/* ── bits ── */
+/* -- bits -- */
 
 function BaseUrl() {
   return (
@@ -465,7 +465,7 @@ function Code({ children }: { children: string }) {
   );
 }
 
-/** Reference table for the docs prose — the first column is the identifier
+/** Reference table for the docs prose - the first column is the identifier
  *  (field/param/code), so it wears mono ink while the rest stays secondary. */
 function Table({ head, rows }: { head: string[]; rows: string[][] }) {
   return (

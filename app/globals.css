@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
-/* ─────────────────────────────────────────────────────────────────────────────
+/* -----------------------------------------------------------------------------
    Blue-IQ design tokens.
 
    The product platform and the UAT console are independent apps that are meant
    to LOOK like one product. These token values (palette, type roles, motion) are
-   intentionally identical in both repos — if you change one, change the other to
+   intentionally identical in both repos - if you change one, change the other to
    match. See docs/PLATFORM.md in the parser repo for the design reference.
 
    Palette: Blue-IQ deep blue (#002181) on a cool-white enterprise canvas.
-   ───────────────────────────────────────────────────────────────────────────── */
+   ----------------------------------------------------------------------------- */
 
 /* Rebind the dark variant to a class we never apply, so OS dark-mode can't
    half-apply stray `dark:` utilities left in either codebase. */
@@ -25,7 +25,7 @@
   --background: var(--paper);
   --foreground: var(--ink);
 
-  /* Legacy token bridge — the UAT console still references these names. */
+  /* Legacy token bridge - the UAT console still references these names. */
   --bg: var(--paper);
   --bg-elev: var(--surface);
   --fg: var(--ink);
@@ -65,15 +65,15 @@
   --color-brass-600: #8a5f06;
 }
 
-/* ── Data-visualisation palette ───────────────────────────────────────────────
-   Categorical hues in FIXED order — series 1 is always --viz-1. Never cycled and
+/* -- Data-visualisation palette -----------------------------------------------
+   Categorical hues in FIXED order - series 1 is always --viz-1. Never cycled and
    never reassigned by rank, so a filter that drops a series doesn't repaint the
    survivors. Validated on the #ffffff chart surface with the dataviz six checks
    (lightness band, chroma floor, CVD separation, normal-vision floor, contrast):
-   all pass, worst adjacent pair ΔE 19.1 (protan). Re-run the validator before
+   all pass, worst adjacent pair delta E 19.1 (protan). Re-run the validator before
    changing ANY value here.
 
-   A 9th series is never a generated hue — fold it into "Other" or facet. */
+   A 9th series is never a generated hue - fold it into "Other" or facet. */
 :root {
   --viz-1: #2c49d6;   /* brand cobalt */
   --viz-2: #b07a08;   /* brass */
@@ -82,14 +82,14 @@
   --viz-5: #6d28d9;   /* violet */
   --viz-6: #15803d;   /* green */
 
-  /* Reserved status colors — state, never "series 7". Always shipped with a
+  /* Reserved status colors - state, never "series 7". Always shipped with a
      label or icon so state is never carried by colour alone. */
   --viz-good: #15803d;
   --viz-warning: #b07a08;
   --viz-serious: #c2410c;
   --viz-critical: #b91c1c;
 
-  /* Sequential ramp (magnitude): one hue, light → dark. */
+  /* Sequential ramp (magnitude): one hue, light -> dark. */
   --viz-seq-1: #dde5fc;
   --viz-seq-2: #93a7f0;
   --viz-seq-3: #2c49d6;
@@ -132,7 +132,7 @@ html {
   border-radius: 4px;
 }
 
-/* ── Small-caps editorial label ─────────────────────────────────────────────── */
+/* -- Small-caps editorial label ----------------------------------------------- */
 .label-caps {
   font-size: 0.6875rem;
   font-weight: 600;
@@ -140,18 +140,18 @@ html {
   text-transform: uppercase;
 }
 
-/* ── Hairline ruled divider ─────────────────────────────────────────────────── */
+/* -- Hairline ruled divider --------------------------------------------------- */
 .rule {
   border: 0;
   border-top: 1px solid var(--line);
 }
 
-/* Enterprise theme uses solid fills only — no decorative gradients. */
+/* Enterprise theme uses solid fills only - no decorative gradients. */
 .text-gradient {
   color: var(--color-accent-600);
 }
 
-/* ── Structural background: hairline grid, masked to fade out ────────────────── */
+/* -- Structural background: hairline grid, masked to fade out ------------------ */
 .bg-grid {
   background-image:
     linear-gradient(to right, var(--line) 1px, transparent 1px),
@@ -161,7 +161,7 @@ html {
   mask-image: radial-gradient(ellipse 78% 56% at 50% 0%, #000 34%, transparent 72%);
 }
 
-/* ── Faint canvas texture for depth (UAT console shell) ─────────────────────── */
+/* -- Faint canvas texture for depth (UAT console shell) ----------------------- */
 .paper-grain::before {
   content: "";
   position: fixed;
@@ -176,7 +176,7 @@ html {
   z-index: 1;
 }
 
-/* ── Keyframes ──────────────────────────────────────────────────────────────── */
+/* -- Keyframes ---------------------------------------------------------------- */
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: none; }
@@ -217,7 +217,7 @@ html {
   100% { transform: translateX(100%); }
 }
 
-/* ── Animation utilities ────────────────────────────────────────────────────── */
+/* -- Animation utilities ------------------------------------------------------ */
 .animate-fade-up { animation: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
 .animate-menu { animation: menu-in 0.16s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
 .animate-word { animation: word-in 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
@@ -268,7 +268,7 @@ html {
   animation: spin-ring 4s linear infinite;
 }
 
-/* ── Scroll-reveal (toggled by the <Reveal> client component) ────────────────── */
+/* -- Scroll-reveal (toggled by the <Reveal> client component) ------------------ */
 .reveal {
   opacity: 0;
   transform: translateY(22px);
@@ -280,7 +280,7 @@ html {
   transform: none;
 }
 
-/* ── Refined scrollbar for JSON / long lists ────────────────────────────────── */
+/* -- Refined scrollbar for JSON / long lists ---------------------------------- */
 .scroll-fine::-webkit-scrollbar { width: 10px; height: 10px; }
 .scroll-fine::-webkit-scrollbar-track { background: transparent; }
 .scroll-fine::-webkit-scrollbar-thumb {

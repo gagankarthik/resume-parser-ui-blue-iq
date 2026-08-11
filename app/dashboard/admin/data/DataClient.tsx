@@ -130,7 +130,7 @@ export default function DataClient({ tables }: { tables: TableRef[] }) {
   return (
     <div>
       <div className="mb-6">
-        <p className="label-caps text-accent-700">Admin · DynamoDB</p>
+        <p className="label-caps text-accent-700">Admin - DynamoDB</p>
         <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight text-ink">Data viewer</h1>
         <p className="mt-1 text-sm text-ink-soft">Live contents of the resume-parser tables (region us-east-2). Read-only.</p>
       </div>
@@ -175,7 +175,7 @@ export default function DataClient({ tables }: { tables: TableRef[] }) {
         {data && (
           <span className="text-sm text-ink-soft">
             <span className="font-mono font-semibold text-ink">{data.count}</span> items
-            {data.truncated && <span className="ml-1 text-amber-600"> · truncated at 300</span>}
+            {data.truncated && <span className="ml-1 text-amber-600"> - truncated at 300</span>}
             <span className="ml-2 font-mono text-xs text-ink-soft/70">{data.name}</span>
           </span>
         )}
@@ -192,12 +192,10 @@ export default function DataClient({ tables }: { tables: TableRef[] }) {
 
       {!error && !raw && data && (
         filtered.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-line">
-            <EmptyState
-              title={items.length === 0 ? "This table is empty." : "No rows match your filter."}
-              hint={items.length === 0 ? undefined : "Clear the filter to see all rows."}
-            />
-          </div>
+          <EmptyState
+            title={items.length === 0 ? "This table is empty." : "No rows match your filter."}
+            hint={items.length === 0 ? undefined : "Clear the filter to see all rows."}
+          />
         ) : (
           <TableWrap>
             <Table className="min-w-[42rem]">

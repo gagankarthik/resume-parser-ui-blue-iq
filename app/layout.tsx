@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: "Blue-IQ Capture | Universal Document AI",
-    template: "%s · Blue-IQ Capture",
+    template: "%s - Blue-IQ Capture",
   },
   description: DESCRIPTION,
   applicationName: "Blue-IQ Capture",
