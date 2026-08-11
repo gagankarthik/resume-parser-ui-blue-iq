@@ -10,6 +10,9 @@ export interface SessionClaims {
   sub: string;
   email: string;
   name?: string;
+  /** Cognito group memberships from the `cognito:groups` claim. Empty when the
+   *  user is in no group, which is the default and means "regular user". */
+  groups: string[];
 }
 
 // Pool ID and client ID are public identifiers (not secrets), so a single
@@ -36,7 +39,16 @@ export async function verifyIdToken(token: string): Promise<SessionClaims | null
     const payload = await verifier().verify(token);
     const email = String(payload.email ?? "");
     if (!email) return null;
-    return { sub: String(payload.sub), email, name: payload.name ? String(payload.name) : undefined };
+    // Cognito emits `cognito:groups` only when the user belongs to at least one
+    // group, so a missing claim is the normal case for a regular user.
+    const raw = (payload as Record<string, unknown>)["cognito:groups"];
+    const groups = Array.isArray(raw) ? raw.map(String) : [];
+    return {
+      sub: String(payload.sub),
+      email,
+      name: payload.name ? String(payload.name) : undefined,
+      groups,
+    };
   } catch {
     return null;
   }

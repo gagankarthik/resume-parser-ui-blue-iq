@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { PasswordInput } from "@/components/PasswordInput";
 import { AuthHeading, AuthShell } from "@/components/landing/AuthShell";
 import { Button, ErrorBanner, Input, Label } from "@/components/ui";
 import { confirmSignUp, login, resendCode, signUp } from "@/lib/account";
@@ -76,8 +77,7 @@ export default function SignupPage() {
               </div>
               <div>
                 <Label>Password</Label>
-                <Input
-                  type="password"
+                <PasswordInput
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 8 characters"

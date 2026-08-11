@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { PasswordInput } from "@/components/PasswordInput";
 import { AuthHeading, AuthShell } from "@/components/landing/AuthShell";
 import { Button, ErrorBanner, Input, Label } from "@/components/ui";
 import { confirmSignUp, login, resendCode } from "@/lib/account";
@@ -85,7 +86,7 @@ export default function LoginPage() {
               </div>
               <div>
                 <Label>Password</Label>
-                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} required />
               </div>
               {error && <ErrorBanner message={error} />}
               <Button type="submit" loading={loading} className="w-full">

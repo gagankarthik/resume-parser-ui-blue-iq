@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import { MobileNav, Sidebar } from "@/components/dashboard/Sidebar";
 import { Logo } from "@/components/ui";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdmin as hasAdminRights } from "@/lib/admin";
 import { getSessionClaims } from "@/lib/session";
 
 // Everything under /dashboard sits behind a verified session. Inherit the site
@@ -19,7 +19,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const claims = await getSessionClaims();
   if (!claims) redirect("/login");
 
-  const isAdmin = isAdminEmail(claims.email);
+  // Group membership lives on the verified token, not on the address.
+  const isAdmin = hasAdminRights(claims);
 
   return (
     <div className="flex min-h-screen">
