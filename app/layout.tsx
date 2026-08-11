@@ -28,7 +28,7 @@ const mono = IBM_Plex_Mono({
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 const DESCRIPTION =
-  "Blue-IQ Capture turns any document - resumes, contracts, invoices, licenses - into structured, confidence-scored data. Domain-tuned, never fabricates, SOC 2 / HIPAA / GDPR aligned. Powered by the Sonar engine.";
+  "Blue-IQ Capture turns any document - resumes, contracts, invoices, licenses - into structured, confidence-scored data. Domain-tuned, never fabricates. Powered by the Sonar engine.";
 
 // Site-wide SEO defaults. Individual routes override `title`/`description` and
 // inherit everything else, so no page ships without OG tags, a canonical URL or

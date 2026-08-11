@@ -42,8 +42,6 @@ const COLUMNS: Col[] = [
   },
 ];
 
-const BADGES = ["SOC 2 Type II", "HIPAA", "GDPR"];
-
 function FooterLink({ href, label }: { href: string; label: string }) {
   const cls = "text-[14.5px] text-ink-soft transition-colors hover:text-accent-700";
   if (href.startsWith("/")) {
@@ -76,17 +74,6 @@ export function SiteFooter() {
               Any document in. Structured, schema-validated, confidence-scored data out. Built for
               the paperwork that runs your business.
             </p>
-            <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
-              {BADGES.map((b) => (
-                <span key={b} className="inline-flex items-center gap-1.5 text-[13px] font-medium text-ink">
-                  <svg className="h-3.5 w-3.5 text-accent-700" viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
-                    <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  {b}
-                </span>
-              ))}
-            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">

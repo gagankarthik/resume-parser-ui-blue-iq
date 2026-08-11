@@ -32,7 +32,7 @@ const HERO_VIDEO =
 export const metadata: Metadata = {
   title: "Blue-IQ Capture | Universal Document AI (Any Document to Structured Data)",
   description:
-    "Blue-IQ Capture turns any document (resumes, contracts, invoices, licenses) into structured, confidence-scored data. Domain-tuned, never fabricates, SOC 2 / HIPAA / GDPR aligned. Powered by the Sonar engine.",
+    "Blue-IQ Capture turns any document (resumes, contracts, invoices, licenses) into structured, confidence-scored data. Domain-tuned, never fabricates. Powered by the Sonar engine.",
   keywords: [
     "document AI",
     "intelligent document processing",
@@ -67,7 +67,7 @@ const JSON_LD = {
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web",
   description:
-    "Universal document AI: turns resumes, contracts, invoices, and licenses into schema-validated, confidence-scored data. Domain-tuned, never fabricates, powered by the Sonar engine. SOC 2 Type II, HIPAA, and GDPR aligned.",
+    "Universal document AI: turns resumes, contracts, invoices, and licenses into schema-validated, confidence-scored data. Domain-tuned, never fabricates, powered by the Sonar engine.",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "Book a demo on your own documents" },
 };
 
@@ -116,11 +116,21 @@ function Hero() {
         >
           <span className="text-ink">Any document in.</span>
           <br />
-          <span className="text-ink-soft/65">
-            Structured, schema-validated,{" "}
-            <span className="whitespace-nowrap">confidence<HeroPill />scored</span> data out.
-          </span>
+          <span className="text-ink-soft">Structured data out,</span>{" "}
+          <span className="whitespace-nowrap text-accent-700">
+            scored<HeroPill />field
+          </span>{" "}
+          <span className="text-ink-soft">by field.</span>
         </h1>
+
+        <p
+          className="animate-fade-up mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-ink-soft"
+          style={{ animationDelay: "110ms" }}
+        >
+          Resumes, contracts, invoices, licences. Capture pulls out the fields that matter and tells
+          you how sure it is about each one, so your team stops re-typing and only checks what is
+          actually in doubt.
+        </p>
 
         <div className="animate-fade-up mt-9 flex flex-wrap items-center justify-center gap-3" style={{ animationDelay: "180ms" }}>
           <a
@@ -195,12 +205,12 @@ function CoreFeatures() {
           Core Features
         </p>
         <h2 className="mb-3 text-[2.25rem] font-medium tracking-[-0.02em] text-[#0f172a] sm:text-[2.75rem]">
-          Built for Speed &amp; Accuracy
+          Fast where it can be. Careful where it counts.
         </h2>
         <p className="mb-[50px] text-[1.125rem] leading-[1.5] text-[#64748b]">
-          Everything you need to go
+          Three things every document team asks for,
           <br />
-          from paperwork to structured data
+          and most parsers quietly skip
         </p>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -332,7 +342,7 @@ function HowItWorks() {
     {
       n: "01",
       title: "Ingest anything",
-      body: "PDFs, scans, exports, email attachments. Send them through the API or a watched folder. OCR handles the ones that were photographed on a phone.",
+      body: "PDFs, scans, exports, whatever landed in the inbox. Post them to the API or drop them in a watched folder. If someone photographed it on a phone, OCR picks it up.",
       mono: "api - watched folder - ocr",
       bg: "linear-gradient(180deg, #fcfdfd 0%, #f4f7f9 30%, #e2ebef 66%, #cedce4 100%)",
       art: <ArtIngest />,
@@ -340,7 +350,7 @@ function HowItWorks() {
     {
       n: "02",
       title: "Read and score with Sonar",
-      body: "Sonar, the Blue-IQ engine, pulls out the fields that matter and scores its own confidence on each one - so uncertainty is surfaced for review, never buried in the output. It never invents a value.",
+      body: "Sonar reads the document and scores itself as it goes. Where it is unsure, it says so. Where it has nothing, it returns null. It will not invent a value to fill a gap.",
       mono: "confidence: { field: 0.91 }",
       bg: "radial-gradient(90% 70% at 6% 0%, rgba(226,236,200,.9) 0%, rgba(226,236,200,0) 70%), linear-gradient(168deg, #e2ebc9 0%, #e9f0c4 48%, #f0f4b8 78%, #f3f5b0 100%)",
       art: <ArtScore />,
@@ -348,7 +358,7 @@ function HowItWorks() {
     {
       n: "03",
       title: "Deliver where you work",
-      body: "Schema-validated JSON lands in your ATS, CRM, or warehouse over a documented REST API and signed webhooks. No re-keying, no export step.",
+      body: "Validated JSON goes straight into your ATS, CRM or warehouse over a documented REST API and signed webhooks. Nobody re-types anything.",
       mono: "-> ATS - CRM - warehouse",
       bg: "linear-gradient(103deg, #eae9f5 0%, #e2e0f1 34%, #cfcdea 72%, #c2c0e6 100%)",
       art: <ArtDeliver />,
@@ -358,7 +368,7 @@ function HowItWorks() {
     <section id="how" className="bg-surface" aria-label="How it works">
       <div className="mx-auto max-w-7xl px-5 py-20 sm:px-6 lg:py-28">
 
-        <SectionHead title="From paperwork to payload in three stages." />
+        <SectionHead title="Paperwork in. Payload out. Three stages." />
         {/* The three stages as a feature mosaic, following the supplied design
             language: 22px radius, a 1.6px white inner border, a very soft lift
             shadow, one pastel gradient per panel, 800-weight tight-tracked
@@ -550,28 +560,28 @@ function MoreThanParser() {
     {
       tag: "confidence",
       h: "Confidence on every field",
-      p: "Each value is scored, so review is targeted, not wholesale.",
+      p: "Every value carries a number. Review the weak ones, ship the rest.",
       bg: "linear-gradient(168deg, #e2ebc9 0%, #eaf0c6 55%, #f2f4b4 100%)",
       icon: <GaugeIcon />,
     },
     {
       tag: "no_fabrication",
       h: "Never fabricates",
-      p: "Uncertain fields are flagged, not invented.",
+      p: "No value beats a wrong value. Unsure fields come back null, flagged.",
       bg: "linear-gradient(135deg, #f9d9e9 0%, #fbdfec 55%, #fce6f1 100%)",
       icon: <ShieldIcon />,
     },
     {
       tag: "human_review",
       h: "Human-in-the-loop by design",
-      p: "Set a confidence threshold and route only what needs a second look.",
+      p: "Pick a threshold. Anything under it goes to a person. Everything over it just goes.",
       bg: "linear-gradient(103deg, #eae9f5 0%, #e2e0f1 40%, #cfcdea 100%)",
       icon: <UsersIcon />,
     },
     {
       tag: "schema_valid",
       h: "Schema-validated output",
-      p: "Clean JSON that fits your systems - not a blob of text to clean up later.",
+      p: "JSON that matches your schema on arrival. Not a wall of text to untangle later.",
       bg: "linear-gradient(180deg, #f9f1e8 0%, #fbeee0 60%, #fdeadb 100%)",
       icon: <SuccessIcon />,
     },
@@ -581,8 +591,8 @@ function MoreThanParser() {
     <section id="why" className="bg-paper" aria-label="More than a parser">
       <div className="mx-auto max-w-7xl px-5 py-20 sm:px-6 lg:py-28">
         <SectionHead
-          title="Not a parser. An intelligence layer."
-          lede="Generic parsers flatten the detail and guess when they are unsure. Capture is built for the documents that run your business - and it tells you how sure it is."
+          title="Most parsers guess. This one admits what it does not know."
+          lede="A generic model flattens a credential into word salad and fills the gaps with something plausible. Capture reads the documents your business actually runs on, and puts a number on its own certainty."
         />
 
         <div className="mt-12 grid gap-5 lg:grid-cols-3">
@@ -603,8 +613,8 @@ function MoreThanParser() {
                   Domain-tuned extraction
                 </h3>
                 <p className="mt-3 max-w-lg text-[15.5px] leading-relaxed text-[#1e2a1b]/80">
-                  Capture understands the credentials, clauses, and line items a generic model
-                  flattens. It reads the documents that run your business, not text in the abstract.
+                  A licence number, a governing-law clause, a line item with the wrong tax code.
+                  Capture knows what those are. It learned the paperwork, not text in the abstract.
                 </p>
               </div>
               <ArtDomainTuned />
@@ -712,25 +722,25 @@ function Trust() {
   const measures: { t: string; d: string; bg: string; icon: ReactNode }[] = [
     {
       t: "Encryption in transit",
-      d: "Every request runs over TLS, authenticated by a per-workspace key you can rotate at any time.",
+      d: "TLS on every request, authenticated by a per-workspace key you can rotate whenever you like.",
       icon: <KeyIcon />,
       bg: "linear-gradient(180deg, #fcfdfd 0%, #f4f7f9 35%, #e2ebef 100%)",
     },
     {
       t: "Workspace isolation",
-      d: "Documents and keys are scoped to a workspace, with role-based access and single sign-on.",
+      d: "Documents and keys never leave their workspace. Role-based access and SSO on top.",
       icon: <ShieldIcon />,
       bg: "linear-gradient(103deg, #eae9f5 0%, #e2e0f1 45%, #cfcdea 100%)",
     },
     {
       t: "Zero-retention option",
-      d: "Turn on zero retention and documents are parsed in memory and never stored - nothing to breach.",
+      d: "Switch on zero retention and the document is parsed in memory and gone. Nothing stored is nothing to leak.",
       icon: <DatabaseIcon />,
       bg: "linear-gradient(168deg, #e2ebc9 0%, #eaf0c6 55%, #f2f4b4 100%)",
     },
     {
       t: "Content-free audit trail",
-      d: "We log that a parse happened - duration, file type, token spend - never what the document said.",
+      d: "We log that a parse happened, how long it took and what it cost. Never a word of what it said.",
       icon: <DocsIcon />,
       bg: "linear-gradient(180deg, #f9f1e8 0%, #fbeee0 60%, #fdeadb 100%)",
     },
@@ -741,24 +751,10 @@ function Trust() {
       <div className="mx-auto max-w-7xl px-5 py-20 sm:px-6 lg:py-28">
         <div className="text-center">
           <SectionHead
-            title="Sensitive documents, handled that way."
-            lede="Your documents carry clinical records, signed contracts, and financial detail. Capture treats them accordingly."
+            title="These are real people's records. We treat them that way."
+            lede="Clinical histories, signed agreements, salary lines. What you send us is not test data, and the handling reflects that."
             centered
           />
-          <Reveal delay={80}>
-            <div className="mt-8 flex flex-wrap justify-center gap-2.5">
-              {["SOC 2 Type II", "HIPAA", "GDPR"].map((b) => (
-                <span
-                  key={b}
-                  className="inline-flex h-[34px] items-center gap-2 rounded-full bg-white/90 px-4 text-[13px] font-semibold text-[#131313] backdrop-blur-[7px]"
-                  style={{ boxShadow: "0 0 0 3px rgba(0,0,0,.047)" }}
-                >
-                  <ShieldTick />
-                  {b} aligned
-                </span>
-              ))}
-            </div>
-          </Reveal>
         </div>
 
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -794,7 +790,7 @@ function Cta() {
       <div className="mx-auto max-w-7xl px-5 py-20 sm:px-6 lg:py-24">
         <Reveal>
           <div
-            className="relative overflow-hidden rounded-[26px] px-8 py-16 text-center sm:px-14 lg:py-20"
+            className="relative overflow-hidden rounded-[26px] bg-[#f7f9fc] px-8 py-16 text-center sm:px-14 lg:py-20"
             style={{
               border: "1.6px solid rgba(255,255,255,.92)",
               boxShadow: "0 2px 16px rgba(24,30,45,.045)",
@@ -804,15 +800,15 @@ function Cta() {
               className="relative inline-flex h-[31px] items-center rounded-full bg-white/90 px-[15px] text-[12px] font-bold tracking-[-0.01em] text-[#111] backdrop-blur-[7px]"
               style={{ boxShadow: "0 0 0 3px rgba(0,0,0,.047)" }}
             >
-              On your own documents - live
+              Live, on your files
             </span>
 
             <h2 className="mx-auto mt-6 max-w-3xl font-display text-[2.35rem] font-extrabold leading-[1.08] tracking-[-0.032em] text-balance text-[#15201a] sm:text-[3rem]">
-              Put your documents to work.
+              Send us your worst document.
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-[#1e2a1b]/75">
-              Tell us what your team is working with. We will show you what Capture does with it,
-              live, on your own documents.
+              The messy scan. The seven-page contract. The resume with three job titles crammed
+              into one line. We will run it live and show you exactly what comes back.
             </p>
 
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
@@ -855,14 +851,6 @@ function SectionHead({ title, lede, centered }: { title: string; lede?: string; 
 
 /* ── Bits ────────────────────────────────────────────────────────────────── */
 
-function ShieldTick() {
-  return (
-    <svg className="h-4 w-4 text-accent-700" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
-      <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 function K({ children }: { children: ReactNode }) {
   return <span className="text-[#7fb4ff]">{children}</span>;
