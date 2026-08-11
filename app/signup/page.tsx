@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Button, Card, ErrorBanner, Input, Label, Logo } from "@/components/ui";
+import { AuthHeading, AuthShell } from "@/components/landing/AuthShell";
+import { Button, ErrorBanner, Input, Label } from "@/components/ui";
 import { confirmSignUp, login, resendCode, signUp } from "@/lib/account";
 
 type Step = "details" | "confirm";
@@ -57,15 +58,13 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-sm flex-col justify-center px-5 py-10">
-      <Link href="/" className="mb-6 flex justify-center"><Logo className="h-8 w-auto" /></Link>
-      <Card>
+    <AuthShell>
         {step === "details" ? (
           <>
-            <h1 className="mb-1 font-display text-2xl font-semibold tracking-tight text-ink">Create your account</h1>
-            <p className="mb-5 text-sm text-ink-soft">
-              Get an API key and start parsing resumes.
-            </p>
+            <AuthHeading
+              title="Create your account"
+              sub="Get an API key in minutes and start turning documents into structured data."
+            />
             <form onSubmit={onDetails} className="space-y-4">
               <div>
                 <Label>Company name</Label>
@@ -93,8 +92,10 @@ export default function SignupPage() {
           </>
         ) : (
           <>
-            <h1 className="mb-1 font-display text-2xl font-semibold tracking-tight text-ink">Verify your email</h1>
-            {info && <p className="mb-4 text-sm text-ink-soft">{info}</p>}
+            <AuthHeading
+              title="Verify your email"
+              sub={info || "Enter the code we sent you to activate your account."}
+            />
             <form onSubmit={onConfirm} className="space-y-4">
               <div>
                 <Label>Verification code</Label>
@@ -128,7 +129,6 @@ export default function SignupPage() {
             Sign in
           </Link>
         </p>
-      </Card>
-    </div>
+    </AuthShell>
   );
 }

@@ -1,414 +1,142 @@
 "use client";
 
-// Enterprise top navigation with mega-menu dropdowns (Product / Developers),
-// a Platform link, a Company link to blue-iq.ai, and auth CTAs. Hover-to-open on
-// desktop with keyboard + click support; a full slide-down sheet on mobile.
+// Top navigation. Deliberately flat: the previous mega-menus advertised
+// sections that no longer exist and buried four real destinations behind two
+// hover panels. Four links, two actions, one mobile sheet.
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 
-type MenuItem = {
-  label: string;
-  desc: string;
-  href: string;
-  icon: ReactNode;
-};
-
-type Menu = {
-  id: string;
-  label: string;
-  columns: { heading: string; items: MenuItem[] }[];
-  feature?: { eyebrow: string; title: string; body: string; href: string; cta: string };
-};
-
-const MENUS: Menu[] = [
-  {
-    id: "product",
-    label: "Product",
-    columns: [
-      {
-        heading: "Capture",
-        items: [
-          { label: "Universal extraction", desc: "Any document to schema-validated JSON", href: "#how", icon: <FileIcon /> },
-          { label: "Confidence scoring", desc: "Per-field scores to route human review", href: "#why", icon: <GaugeIcon /> },
-          { label: "Schema & validation", desc: "One strict, versioned output contract", href: "#why", icon: <BracketsIcon /> },
-          { label: "Webhooks & events", desc: "Signed callbacks for async & batch jobs", href: "/docs#webhooks", icon: <BoltIcon /> },
-        ],
-      },
-      {
-        heading: "What it reads",
-        items: [
-          { label: "Resumes & licences", desc: "Credentials, numbers & honest dates", href: "#how", icon: <PulseIcon /> },
-          { label: "Contracts & MSAs", desc: "Parties, terms, clauses & governing law", href: "#how", icon: <FileIcon /> },
-          { label: "Invoices & receipts", desc: "Vendors, line items, totals & due dates", href: "#how", icon: <BracketsIcon /> },
-        ],
-      },
-    ],
-    feature: {
-      eyebrow: "Featured",
-      title: "Not a parser. An intelligence layer.",
-      body: "Domain-tuned extraction that understands the credentials, clauses, and line items a generic model flattens.",
-      href: "#why",
-      cta: "Why it is more",
-    },
-  },
-  {
-    id: "developers",
-    label: "Developers",
-    columns: [
-      {
-        heading: "Build",
-        items: [
-          { label: "API documentation", desc: "Auth, parsing, polling, webhooks & errors", href: "/docs", icon: <BookIcon /> },
-          { label: "Quickstart", desc: "First structured response in minutes", href: "/docs#quickstart", icon: <RocketIcon /> },
-        ],
-      },
-      {
-        heading: "Reference",
-        items: [
-          { label: "Webhook events", desc: "parse.completed, parse.failed, batch.completed", href: "/docs#webhooks", icon: <BoltIcon /> },
-          { label: "Error handling", desc: "Status codes & retry guidance", href: "/docs#errors", icon: <AlertIcon /> },
-        ],
-      },
-    ],
-    feature: {
-      eyebrow: "No SDK required",
-      title: "A request and a response",
-      body: "API-key auth, multipart upload, structured JSON back. Integrate with the stack you already run.",
-      href: "/docs",
-      cta: "Read the docs",
-    },
-  },
+const LINKS: { label: string; href: string }[] = [
+  { label: "How it works", href: "#how" },
+  { label: "Why Capture", href: "#why" },
+  { label: "Security", href: "#security" },
+  { label: "Docs", href: "/docs" },
 ];
 
-export function SiteNav({ authed = false }: { authed?: boolean }) {
-  const [open, setOpen] = useState<string | null>(null);
-  const [mobile, setMobile] = useState(false);
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+function NavLink({ href, label, onClick, className }: { href: string; label: string; onClick?: () => void; className?: string }) {
+  const cls = className ?? "rounded-lg px-3.5 py-2 text-sm font-medium text-ink-soft transition-colors hover:text-ink";
+  return href.startsWith("/") ? (
+    <Link href={href} onClick={onClick} className={cls}>
+      {label}
+    </Link>
+  ) : (
+    <a href={href} onClick={onClick} className={cls}>
+      {label}
+    </a>
+  );
+}
 
-  // Lock body scroll while the mobile sheet is open.
+export function SiteNav({ authed }: { authed: boolean }) {
+  const [open, setOpen] = useState(false);
+
+  // Lock the page behind the mobile sheet, and make Escape close it.
   useEffect(() => {
-    document.body.style.overflow = mobile ? "hidden" : "";
+    document.body.style.overflow = open ? "hidden" : "";
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
     };
-  }, [mobile]);
-
-  // Close menus on Escape.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setOpen(null);
-        setMobile(false);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
-  function openMenu(id: string) {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    setOpen(id);
-  }
-  function scheduleClose() {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    closeTimer.current = setTimeout(() => setOpen(null), 120);
-  }
+  }, [open]);
 
   return (
-    <>
-    <header className="sticky top-0 z-50 border-b border-line/70 bg-paper/80 backdrop-blur-md">
-      <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-6" onMouseLeave={scheduleClose}>
-        <div className="flex shrink-0 items-center">
-          <Link href="/" className="flex items-center" onMouseEnter={scheduleClose}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.svg" alt="Blue-IQ" className="h-7 w-auto sm:h-8" />
-          </Link>
-        </div>
+    <header className="sticky top-0 z-50 bg-[var(--canvas)]/85 backdrop-blur-md">
+      <div className="mx-auto flex h-[4.5rem] max-w-[1600px] items-center justify-between px-6 md:px-12 lg:px-16">
+        <Link href="/" className="flex shrink-0 items-center" aria-label="Blue-IQ Capture home">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.svg" alt="Blue-IQ" className="h-[22px] w-auto sm:h-[26px]" />
+        </Link>
 
-        {/* Desktop nav, single centered panel so it never runs off-screen */}
-        <nav className="hidden items-center gap-1 lg:flex">
-          {MENUS.map((m) => (
-            <div key={m.id} onMouseEnter={() => openMenu(m.id)}>
-              <button
-                type="button"
-                aria-expanded={open === m.id}
-                aria-haspopup="true"
-                onClick={() => setOpen(open === m.id ? null : m.id)}
-                onFocus={() => openMenu(m.id)}
-                className={
-                  "inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors " +
-                  (open === m.id ? "bg-accent-50 text-accent-700" : "text-ink-soft hover:text-ink")
-                }
-              >
-                {m.label}
-                <Chevron open={open === m.id} />
-              </button>
-            </div>
+        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
+          {LINKS.map((l) => (
+            <NavLink key={l.label} {...l} />
           ))}
-
-          <a
-            href="#platform"
-            onMouseEnter={scheduleClose}
-            className="rounded-lg px-3.5 py-2 text-sm font-medium text-ink-soft transition-colors hover:text-ink"
-          >
-            Platform
-          </a>
-
-          <a
-            href="https://blue-iq.ai"
-            target="_blank"
-            rel="noopener noreferrer"
-            onMouseEnter={scheduleClose}
-            className="inline-flex items-center gap-1 rounded-lg px-3.5 py-2 text-sm font-medium text-ink-soft transition-colors hover:text-ink"
-          >
-            Company
-            <svg className="h-3.5 w-3.5 opacity-60" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M7 17L17 7M9 7h8v8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </a>
         </nav>
 
-        {/* Right side */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="hidden items-center gap-2 lg:flex">
           {authed ? (
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-accent-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-px hover:bg-accent-700"
+              className="rounded-lg bg-accent-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-800"
             >
               Dashboard
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </Link>
           ) : (
             <>
-              <Link
-                href="/login"
-                className="hidden rounded-lg px-4 py-2 text-sm font-medium text-ink-soft transition-colors hover:bg-black/[0.04] hover:text-ink sm:inline-flex"
-              >
+              <Link href="/login" className="rounded-lg px-3.5 py-2 text-sm font-medium text-ink-soft transition-colors hover:text-ink">
                 Sign in
               </Link>
               <Link
                 href="/signup"
-                className="hidden rounded-lg bg-accent-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-px hover:bg-accent-700 sm:inline-flex"
+                className="rounded-lg bg-accent-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-800"
               >
                 Get started
               </Link>
             </>
           )}
-          <button
-            type="button"
-            aria-label="Toggle menu"
-            aria-expanded={mobile}
-            onClick={() => setMobile((v) => !v)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-ink hover:bg-black/[0.04] lg:hidden"
-          >
-            {mobile ? <CloseIcon /> : <BurgerIcon />}
-          </button>
         </div>
 
-        {open && (
-          <MegaPanel menu={MENUS.find((m) => m.id === open)!} onNavigate={() => setOpen(null)} />
-        )}
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-label={open ? "Close menu" : "Open menu"}
+          className="grid h-10 w-10 place-items-center rounded-lg text-ink transition-colors hover:bg-black/[0.04] lg:hidden"
+        >
+          <svg viewBox="0 0 24 24" width={20} height={20} fill="none" aria-hidden>
+            {open ? (
+              <path d="M6.5 6.5l11 11M17.5 6.5l-11 11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            ) : (
+              <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            )}
+          </svg>
+        </button>
       </div>
-    </header>
 
-    {mobile && <MobileSheet authed={authed} onNavigate={() => setMobile(false)} />}
-    </>
-  );
-}
-
-/* ── Desktop mega panel ──────────────────────────────────────────────────── */
-
-function MegaPanel({ menu, onNavigate }: { menu: Menu; onNavigate: () => void }) {
-  return (
-    <div
-      role="menu"
-      className="animate-menu absolute left-1/2 top-full z-50 hidden w-[min(43rem,calc(100vw-1.5rem))] -translate-x-1/2 pt-3 lg:block"
-    >
-      <div className="grid w-full grid-cols-[1.45fr_0.85fr] overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_24px_60px_-24px_rgba(10,23,51,0.28)]">
-        <div className="grid grid-cols-2 gap-x-3 gap-y-4 p-5">
-          {menu.columns.map((col) => (
-            <div key={col.heading}>
-              <p className="label-caps mb-1.5 text-ink-soft/70">{col.heading}</p>
-              <ul className="space-y-1">
-                {col.items.map((it) => (
-                  <li key={it.label}>
-                    <PanelLink item={it} onNavigate={onNavigate} />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        {menu.feature && (
-          <Link
-            href={menu.feature.href}
-            onClick={onNavigate}
-            className="group relative flex flex-col justify-between overflow-hidden border-l border-line bg-accent-50 p-5 transition-colors hover:bg-accent-100"
-          >
-            <div className="relative">
-              <p className="label-caps text-accent-700">{menu.feature.eyebrow}</p>
-              <h4 className="mt-2.5 font-display text-[1.05rem] font-semibold leading-snug tracking-tight text-ink">
-                {menu.feature.title}
-              </h4>
-              <p className="mt-2 text-[13px] leading-relaxed text-ink-soft">{menu.feature.body}</p>
-            </div>
-            <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-accent-700">
-              {menu.feature.cta}
-              <Arrow />
-            </span>
-          </Link>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function PanelLink({ item, onNavigate }: { item: MenuItem; onNavigate: () => void }) {
-  const inner = (
-    <span className="flex items-start gap-2.5 rounded-lg p-2 transition-colors hover:bg-accent-50">
-      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-accent-50 text-accent-700 ring-1 ring-inset ring-accent-100">
-        {item.icon}
-      </span>
-      <span>
-        <span className="block text-[13px] font-semibold text-ink">{item.label}</span>
-        <span className="mt-0.5 block text-[11px] leading-snug text-ink-soft">{item.desc}</span>
-      </span>
-    </span>
-  );
-  return item.href.startsWith("/") ? (
-    <Link href={item.href} onClick={onNavigate} role="menuitem">
-      {inner}
-    </Link>
-  ) : (
-    <a href={item.href} onClick={onNavigate} role="menuitem" {...(item.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
-      {inner}
-    </a>
-  );
-}
-
-/* ── Mobile sheet ────────────────────────────────────────────────────────── */
-
-function MobileSheet({ authed, onNavigate }: { authed?: boolean; onNavigate: () => void }) {
-  const [section, setSection] = useState<string | null>(MENUS[0].id);
-  return (
-    <div className="animate-menu fixed inset-x-0 top-16 bottom-0 z-40 overflow-y-auto border-t border-line bg-paper px-5 pb-10 pt-4 lg:hidden">
-      <div className="space-y-1">
-        {MENUS.map((m) => {
-          const expanded = section === m.id;
-          return (
-            <div key={m.id} className="border-b border-line/70">
-              <button
-                type="button"
-                onClick={() => setSection(expanded ? null : m.id)}
-                aria-expanded={expanded}
-                className="flex w-full items-center justify-between py-3.5 text-left text-base font-semibold text-ink"
+      {open && (
+        <div className="animate-menu border-t border-line/70 bg-[var(--canvas)] px-6 pb-6 pt-2 lg:hidden">
+          <nav className="flex flex-col" aria-label="Primary">
+            {LINKS.map((l) => (
+              <NavLink
+                key={l.label}
+                {...l}
+                onClick={() => setOpen(false)}
+                className="border-b border-line/70 py-3.5 text-base font-semibold text-ink"
+              />
+            ))}
+          </nav>
+          <div className="mt-5 flex flex-col gap-2.5">
+            {authed ? (
+              <Link
+                href="/dashboard"
+                onClick={() => setOpen(false)}
+                className="rounded-lg bg-accent-700 px-4 py-3 text-center text-sm font-semibold text-white"
               >
-                {m.label}
-                <Chevron open={expanded} />
-              </button>
-              {expanded && (
-                <div className="pb-3">
-                  {m.columns.map((col) => (
-                    <div key={col.heading} className="mb-2">
-                      <p className="label-caps px-1 py-1.5 text-ink-soft/70">{col.heading}</p>
-                      {col.items.map((it) => (
-                        <MobileLink key={it.label} item={it} onNavigate={onNavigate} />
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-        <a href="#platform" onClick={onNavigate} className="block border-b border-line/70 py-3.5 text-base font-semibold text-ink">
-          Platform
-        </a>
-        <a href="https://blue-iq.ai" target="_blank" rel="noopener noreferrer" onClick={onNavigate} className="flex items-center gap-1.5 border-b border-line/70 py-3.5 text-base font-semibold text-ink">
-          Company
-          <svg className="h-4 w-4 opacity-60" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M7 17L17 7M9 7h8v8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        </a>
-      </div>
-
-      <div className="mt-6 flex flex-col gap-2.5">
-        {authed ? (
-          <Link href="/dashboard" onClick={onNavigate} className="inline-flex h-11 items-center justify-center rounded-lg bg-accent-700 px-5 text-sm font-medium text-white shadow-sm">
-            Go to dashboard
-          </Link>
-        ) : (
-          <>
-            <Link href="/signup" onClick={onNavigate} className="inline-flex h-11 items-center justify-center rounded-lg bg-accent-700 px-5 text-sm font-medium text-white shadow-sm">
-              Get started
-            </Link>
-            <Link href="/login" onClick={onNavigate} className="inline-flex h-11 items-center justify-center rounded-lg border border-line-strong px-5 text-sm font-medium text-ink">
-              Sign in
-            </Link>
-          </>
-        )}
-      </div>
-    </div>
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/signup"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg bg-accent-700 px-4 py-3 text-center text-sm font-semibold text-white"
+                >
+                  Get started
+                </Link>
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg border border-line-strong bg-surface px-4 py-3 text-center text-sm font-semibold text-ink"
+                >
+                  Sign in
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </header>
   );
-}
-
-function MobileLink({ item, onNavigate }: { item: MenuItem; onNavigate: () => void }) {
-  const inner = (
-    <span className="flex items-center gap-3 rounded-xl px-1 py-2.5">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-50 text-accent-700 ring-1 ring-inset ring-accent-100">
-        {item.icon}
-      </span>
-      <span>
-        <span className="block text-sm font-semibold text-ink">{item.label}</span>
-        <span className="block text-xs text-ink-soft">{item.desc}</span>
-      </span>
-    </span>
-  );
-  return item.href.startsWith("/") ? (
-    <Link href={item.href} onClick={onNavigate}>{inner}</Link>
-  ) : (
-    <a href={item.href} onClick={onNavigate} {...(item.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}>{inner}</a>
-  );
-}
-
-/* ── Icons ───────────────────────────────────────────────────────────────── */
-
-const ic = "h-[18px] w-[18px]";
-function Chevron({ open }: { open: boolean }) {
-  return (
-    <svg className={"h-3.5 w-3.5 transition-transform " + (open ? "rotate-180" : "")} viewBox="0 0 24 24" fill="none">
-      <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-function Arrow() {
-  return <svg className="h-4 w-4 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>;
-}
-function BurgerIcon() {
-  return <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>;
-}
-function CloseIcon() {
-  return <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>;
-}
-function PulseIcon() {
-  return <svg className={ic} viewBox="0 0 24 24" fill="none"><path d="M3 12h4l2-5 4 10 2-5h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
-}
-function FileIcon() {
-  return <svg className={ic} viewBox="0 0 24 24" fill="none"><path d="M14 3v4a1 1 0 0 0 1 1h4M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
-}
-function GaugeIcon() {
-  return <svg className={ic} viewBox="0 0 24 24" fill="none"><path d="M4 18a8 8 0 1 1 16 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /><path d="M12 18l4-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>;
-}
-function BoltIcon() {
-  return <svg className={ic} viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
-}
-function BracketsIcon() {
-  return <svg className={ic} viewBox="0 0 24 24" fill="none"><path d="M8 4H6a2 2 0 0 0-2 2v4l-2 2 2 2v4a2 2 0 0 0 2 2h2M16 4h2a2 2 0 0 1 2 2v4l2 2-2 2v4a2 2 0 0 1-2 2h-2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
-}
-function BookIcon() {
-  return <svg className={ic} viewBox="0 0 24 24" fill="none"><path d="M4 5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2V5zM19 18H6a2 2 0 0 0-2 2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
-}
-function RocketIcon() {
-  return <svg className={ic} viewBox="0 0 24 24" fill="none"><path d="M5 15c-1.5 1.5-2 5-2 5s3.5-.5 5-2M14 5c3-3 6-2 6-2s1 3-2 6l-7 7-4-4 7-7zM15 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
-}
-function AlertIcon() {
-  return <svg className={ic} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" /><path d="M12 8v5M12 16h.01" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>;
 }
