@@ -25,15 +25,55 @@ const mono = IBM_Plex_Mono({
   display: "swap",
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+const DESCRIPTION =
+  "Blue-IQ Capture turns any document - resumes, contracts, invoices, licenses - into structured, confidence-scored data. Domain-tuned, never fabricates, SOC 2 / HIPAA / GDPR aligned. Powered by the Sonar engine.";
+
+// Site-wide SEO defaults. Individual routes override `title`/`description` and
+// inherit everything else, so no page ships without OG tags, a canonical URL or
+// an explicit robots directive. Private routes flip `robots` to noindex in their
+// own layout (see app/dashboard/layout.tsx).
 export const metadata: Metadata = {
   // Resolves canonical/OG URLs; set NEXT_PUBLIC_SITE_URL to the public domain in prod.
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Blue-IQ Capture | Universal Document AI",
     template: "%s · Blue-IQ Capture",
   },
-  description:
-    "Blue-IQ Capture turns any document - resumes, contracts, invoices, licenses - into structured, confidence-scored data. Domain-tuned, never fabricates, SOC 2 / HIPAA / GDPR aligned. Powered by the Sonar engine.",
+  description: DESCRIPTION,
+  applicationName: "Blue-IQ Capture",
+  authors: [{ name: "Ocean Blue Solutions" }],
+  creator: "Ocean Blue Solutions",
+  publisher: "Ocean Blue Solutions",
+  category: "technology",
+  alternates: { canonical: "/" },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Blue-IQ Capture",
+    locale: "en_US",
+    url: SITE_URL,
+    title: "Blue-IQ Capture | Universal Document AI",
+    description: DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Blue-IQ Capture | Universal Document AI",
+    description: "Any document in. Structured, scored data out. Powered by the Sonar engine.",
+  },
+  formatDetection: { telephone: false, address: false, email: false },
+  icons: { icon: "/favicon.ico", shortcut: "/favicon.ico" },
 };
 
 export default function RootLayout({

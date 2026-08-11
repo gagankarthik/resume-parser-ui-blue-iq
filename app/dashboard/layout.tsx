@@ -6,6 +6,14 @@ import { Logo } from "@/components/ui";
 import { isAdminEmail } from "@/lib/admin";
 import { getSessionClaims } from "@/lib/session";
 
+// Everything under /dashboard sits behind a verified session. Inherit the site
+// defaults but flip robots off: these URLs only ever redirect a crawler to
+// /login, so indexing them wastes crawl budget and surfaces dead results.
+export const metadata = {
+  title: "Dashboard",
+  robots: { index: false, follow: false, nocache: true },
+};
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   // Security: server-side verification of the Cognito session on every request.
   const claims = await getSessionClaims();

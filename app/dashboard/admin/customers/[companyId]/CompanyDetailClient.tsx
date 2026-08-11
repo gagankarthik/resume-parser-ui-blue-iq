@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { StatCard } from "@/components/charts";
 import { JobsIcon, SuccessIcon, TokenIcon } from "@/components/icons";
-import { Badge, Button, ErrorBanner, Spinner } from "@/components/ui";
+import { Badge, Button, ErrorBanner, Spinner, TBody, TD, TH, THead, TR, Table } from "@/components/ui";
 import { getAdminCompany, updateAdminCompany } from "@/lib/account";
 import { ApiError, type AdminCompanyDetail, type KeyUsageRow } from "@/lib/types";
 
@@ -218,36 +218,36 @@ export default function CompanyDetailClient({ companyId }: { companyId: string }
             {(keyUsage?.rows.length ?? 0) === 0 ? (
               <EmptyRow text="No API keys" />
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[40rem] text-left text-sm">
-                  <thead className="label-caps bg-black/[0.015] text-ink-soft">
-                    <tr>
-                      <th className="px-5 py-2.5 font-semibold">Key</th>
-                      <th className="px-4 py-2.5 font-semibold">Status</th>
-                      <th className="px-4 py-2.5 text-right font-semibold">Jobs</th>
-                      <th className="px-4 py-2.5 text-right font-semibold">Tokens</th>
-                      <th className="px-5 py-2.5 text-right font-semibold">Share</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <div className="scroll-fine max-w-full overflow-x-auto">
+                <Table className="min-w-[40rem]">
+                  <THead>
+                    <TR>
+                      <TH>Key</TH>
+                      <TH>Status</TH>
+                      <TH numeric>Jobs</TH>
+                      <TH numeric>Tokens</TH>
+                      <TH numeric>Share</TH>
+                    </TR>
+                  </THead>
+                  <TBody>
                     {keyUsage!.rows.map((k) => {
                       const share = t && t.tokens_used ? Math.round((k.tokens / t.tokens_used) * 100) : 0;
                       return (
-                        <tr key={k.key_hash} className="border-t border-line">
-                          <td className="px-5 py-3 font-mono text-sm text-ink">{k.key_prefix || k.key_hash.slice(0, 8)}...</td>
-                          <td className="px-4 py-3">
-                            <Badge tone={k.status === "active" ? "success" : k.status === "unknown" ? "neutral" : "neutral"}>
+                        <TR key={k.key_hash}>
+                          <TD className="font-mono">{k.key_prefix || k.key_hash.slice(0, 8)}...</TD>
+                          <TD>
+                            <Badge tone={k.status === "active" ? "success" : "neutral"}>
                               {k.status === "unknown" ? "deleted" : k.status}
                             </Badge>
-                          </td>
-                          <td className="px-4 py-3 text-right font-mono tabular-nums text-ink">{k.jobs.toLocaleString()}</td>
-                          <td className="px-4 py-3 text-right font-mono tabular-nums text-ink">{k.tokens.toLocaleString()}</td>
-                          <td className="px-5 py-3 text-right font-mono tabular-nums text-ink-soft">{keyUsage!.attributed ? `${share}%` : "-"}</td>
-                        </tr>
+                          </TD>
+                          <TD numeric>{k.jobs.toLocaleString()}</TD>
+                          <TD numeric>{k.tokens.toLocaleString()}</TD>
+                          <TD numeric className="text-ink-soft">{keyUsage!.attributed ? `${share}%` : "-"}</TD>
+                        </TR>
                       );
                     })}
-                  </tbody>
-                </table>
+                  </TBody>
+                </Table>
                 {!keyUsage!.attributed && (
                   <p className="border-t border-line px-5 py-3 text-xs text-ink-soft">
                     Per-key usage is unavailable - recent activity isn't attributed to a specific key.
@@ -279,33 +279,33 @@ export default function CompanyDetailClient({ companyId }: { companyId: string }
             {detail.logs.length === 0 ? (
               <EmptyRow text="No activity in this window" />
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[44rem] text-left text-sm">
-                  <thead className="label-caps bg-black/[0.015] text-ink-soft">
-                    <tr>
-                      <th className="px-5 py-2.5 font-semibold">When</th>
-                      <th className="px-4 py-2.5 font-semibold">Type</th>
-                      <th className="px-4 py-2.5 font-semibold">Status</th>
-                      <th className="px-4 py-2.5 text-right font-semibold">Tokens</th>
-                      <th className="px-4 py-2.5 text-right font-semibold">Time</th>
-                      <th className="px-5 py-2.5 font-semibold">Note</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <div className="scroll-fine max-w-full overflow-x-auto">
+                <Table className="min-w-[44rem]">
+                  <THead>
+                    <TR>
+                      <TH>When</TH>
+                      <TH>Type</TH>
+                      <TH>Status</TH>
+                      <TH numeric>Tokens</TH>
+                      <TH numeric>Time</TH>
+                      <TH>Note</TH>
+                    </TR>
+                  </THead>
+                  <TBody>
                     {detail.logs.map((l) => (
-                      <tr key={l.job_id} className="border-t border-line">
-                        <td className="px-5 py-2.5 font-mono text-xs text-ink-soft">{l.timestamp ? l.timestamp.slice(0, 19).replace("T", " ") : "-"}</td>
-                        <td className="px-4 py-2.5 text-ink-soft">{l.file_type}{l.ocr_used ? " · OCR" : ""}</td>
-                        <td className="px-4 py-2.5">
+                      <TR key={l.job_id}>
+                        <TD className="font-mono text-xs text-ink-soft">{l.timestamp ? l.timestamp.slice(0, 19).replace("T", " ") : "-"}</TD>
+                        <TD className="text-ink-soft">{l.file_type}{l.ocr_used ? " · OCR" : ""}</TD>
+                        <TD>
                           <Badge tone={l.status === "completed" ? "success" : l.status === "failed" ? "danger" : "neutral"}>{l.status}</Badge>
-                        </td>
-                        <td className="px-4 py-2.5 text-right font-mono tabular-nums text-ink">{l.ai_tokens_used.toLocaleString()}</td>
-                        <td className="px-4 py-2.5 text-right font-mono tabular-nums text-ink-soft">{l.duration_ms ? `${l.duration_ms} ms` : "-"}</td>
-                        <td className="px-5 py-2.5 font-mono text-xs text-rose-600">{l.error_code || ""}</td>
-                      </tr>
+                        </TD>
+                        <TD numeric>{l.ai_tokens_used.toLocaleString()}</TD>
+                        <TD numeric className="text-ink-soft">{l.duration_ms ? `${l.duration_ms} ms` : "-"}</TD>
+                        <TD className="font-mono text-xs text-rose-600">{l.error_code || ""}</TD>
+                      </TR>
                     ))}
-                  </tbody>
-                </table>
+                  </TBody>
+                </Table>
               </div>
             )}
           </Panel>

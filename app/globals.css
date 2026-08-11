@@ -1,8 +1,18 @@
 @import "tailwindcss";
 
-/* Enterprise theme: clean cool-white canvas, deep navy ink, a confident royal-
-   blue primary with a cyan data accent. Rebind the dark variant to a class we
-   never apply so OS dark-mode can't half-apply stray dark: utilities. */
+/* ─────────────────────────────────────────────────────────────────────────────
+   Blue-IQ design tokens.
+
+   The product platform and the UAT console are independent apps that are meant
+   to LOOK like one product. These token values (palette, type roles, motion) are
+   intentionally identical in both repos — if you change one, change the other to
+   match. See docs/PLATFORM.md in the parser repo for the design reference.
+
+   Palette: Blue-IQ deep blue (#002181) on a cool-white enterprise canvas.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Rebind the dark variant to a class we never apply, so OS dark-mode can't
+   half-apply stray `dark:` utilities left in either codebase. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
@@ -14,6 +24,13 @@
   --line-strong: #ced5e2;
   --background: var(--paper);
   --foreground: var(--ink);
+
+  /* Legacy token bridge — the UAT console still references these names. */
+  --bg: var(--paper);
+  --bg-elev: var(--surface);
+  --fg: var(--ink);
+  --muted: var(--ink-soft);
+  --accent: #002181;
 }
 
 @theme inline {
@@ -48,11 +65,53 @@
   --color-brass-600: #8a5f06;
 }
 
+/* ── Data-visualisation palette ───────────────────────────────────────────────
+   Categorical hues in FIXED order — series 1 is always --viz-1. Never cycled and
+   never reassigned by rank, so a filter that drops a series doesn't repaint the
+   survivors. Validated on the #ffffff chart surface with the dataviz six checks
+   (lightness band, chroma floor, CVD separation, normal-vision floor, contrast):
+   all pass, worst adjacent pair ΔE 19.1 (protan). Re-run the validator before
+   changing ANY value here.
+
+   A 9th series is never a generated hue — fold it into "Other" or facet. */
+:root {
+  --viz-1: #2c49d6;   /* brand cobalt */
+  --viz-2: #b07a08;   /* brass */
+  --viz-3: #0891b2;   /* cyan */
+  --viz-4: #b91c1c;   /* red */
+  --viz-5: #6d28d9;   /* violet */
+  --viz-6: #15803d;   /* green */
+
+  /* Reserved status colors — state, never "series 7". Always shipped with a
+     label or icon so state is never carried by colour alone. */
+  --viz-good: #15803d;
+  --viz-warning: #b07a08;
+  --viz-serious: #c2410c;
+  --viz-critical: #b91c1c;
+
+  /* Sequential ramp (magnitude): one hue, light → dark. */
+  --viz-seq-1: #dde5fc;
+  --viz-seq-2: #93a7f0;
+  --viz-seq-3: #2c49d6;
+  --viz-seq-4: #123aa8;
+  --viz-seq-5: #002181;
+
+  /* Recessive chart furniture. */
+  --viz-grid: var(--line);
+  --viz-axis: var(--ink-soft);
+}
+
 body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: "ss01", "cv01";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 /* Display headings: modern grotesque with optical sizing where supported. */
@@ -81,46 +140,18 @@ body {
   text-transform: uppercase;
 }
 
-/* Enterprise theme uses solid fills only — no decorative gradients. */
-
 /* ── Hairline ruled divider ─────────────────────────────────────────────────── */
 .rule {
   border: 0;
   border-top: 1px solid var(--line);
 }
 
-/* ── Subtle load-in reveals ─────────────────────────────────────────────────── */
-@keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.animate-fade-up {
-  animation: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+/* Enterprise theme uses solid fills only — no decorative gradients. */
+.text-gradient {
+  color: var(--color-accent-600);
 }
 
-/* ── Mega-menu dropdown reveal ──────────────────────────────────────────────── */
-@keyframes menu-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px) scale(0.99);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.animate-menu {
-  animation: menu-in 0.16s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
-
-/* ── Subtle structural background: hairline grid, masked to fade out. Lines,
-   not a colour wash. ────────────────────────────────────────────────────────── */
+/* ── Structural background: hairline grid, masked to fade out ────────────────── */
 .bg-grid {
   background-image:
     linear-gradient(to right, var(--line) 1px, transparent 1px),
@@ -130,34 +161,114 @@ body {
   mask-image: radial-gradient(ellipse 78% 56% at 50% 0%, #000 34%, transparent 72%);
 }
 
-/* ── Rotating headline word: each word rises into place. ─────────────────────── */
+/* ── Faint canvas texture for depth (UAT console shell) ─────────────────────── */
+.paper-grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+}
+.paper-grain > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Keyframes ──────────────────────────────────────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes menu-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.99); }
+  to { opacity: 1; transform: none; }
+}
 @keyframes word-in {
   from { opacity: 0; transform: translateY(0.55em); }
   to { opacity: 1; transform: none; }
 }
-.animate-word { animation: word-in 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
-
-/* ── Confidence-bar fill: a functional first-paint animation tied to the
-   score it represents, not decoration. ──────────────────────────────────────── */
 @keyframes grow-x {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
 }
-.grow-x {
-  transform-origin: left;
-  animation: grow-x 1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
-
-/* ── Foundation-stack flow: a dot tracing the rail from engine to output. ────── */
 @keyframes flow-up {
   0% { top: 100%; opacity: 0; }
   14% { opacity: 1; }
   86% { opacity: 1; }
   100% { top: 0%; opacity: 0; }
 }
+@keyframes pop-in {
+  0% { opacity: 0; transform: translateY(8px) scale(0.98); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes scan {
+  0% { top: 6%; opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { top: 90%; opacity: 0; }
+}
+@keyframes shimmer-sweep {
+  100% { transform: translateX(100%); }
+}
+
+/* ── Animation utilities ────────────────────────────────────────────────────── */
+.animate-fade-up { animation: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.animate-menu { animation: menu-in 0.16s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.animate-word { animation: word-in 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.pop-in { animation: pop-in 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.animate-float { animation: float-y 3.5s ease-in-out infinite; }
+.animate-scan { animation: scan 1.7s ease-in-out infinite; }
 .flow-dot { animation: flow-up 3.6s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
 
-/* ── Scroll-reveal (toggled by the Reveal client component). ─────────────────── */
+/* One-shot entrance (UAT console). Distinct from `.reveal`, which is the
+   scroll-triggered variant toggled by the product site's <Reveal> component. */
+.animate-reveal { animation: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+/* Confidence-bar fill: a functional first-paint animation tied to the score it
+   represents, not decoration. */
+.grow-x {
+  transform-origin: left;
+  animation: grow-x 1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.animate-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--color-accent-500) 22%, transparent), transparent);
+  animation: shimmer-sweep 1.5s infinite;
+}
+
+/* Animated accent ring for the active dropzone. */
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes spin-ring {
+  to { --angle: 360deg; }
+}
+.ring-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(from var(--angle, 0deg), var(--color-accent-500), var(--color-accent-300), var(--color-accent-600), var(--color-accent-500));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: spin-ring 4s linear infinite;
+}
+
+/* ── Scroll-reveal (toggled by the <Reveal> client component) ────────────────── */
 .reveal {
   opacity: 0;
   transform: translateY(22px);
@@ -169,17 +280,40 @@ body {
   transform: none;
 }
 
+/* ── Refined scrollbar for JSON / long lists ────────────────────────────────── */
+.scroll-fine::-webkit-scrollbar { width: 10px; height: 10px; }
+.scroll-fine::-webkit-scrollbar-track { background: transparent; }
+.scroll-fine::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--color-accent-500) 34%, transparent);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.scroll-fine::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent-500);
+  background-clip: padding-box;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up,
   .animate-menu,
   .animate-word,
+  .animate-reveal,
+  .pop-in,
+  .animate-float,
+  .animate-scan,
   .grow-x,
-  .flow-dot {
+  .flow-dot,
+  .animate-shimmer::after,
+  .ring-glow::before {
     animation: none !important;
   }
   .reveal {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+  html {
+    scroll-behavior: auto;
   }
 }

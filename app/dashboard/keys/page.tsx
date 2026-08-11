@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { Badge, Button, Card, ErrorBanner, SectionTitle, Spinner } from "@/components/ui";
+import { Badge, Button, Card, ErrorBanner, SectionTitle, Spinner, TBody, TD, TH, THead, TR, Table, TableScroll } from "@/components/ui";
 import { createKey, listKeys, revokeKey } from "@/lib/account";
 import { API_BASE, AUTH_HEADER, PARSE_ENDPOINT } from "@/lib/config";
 import { ApiError, type ApiKeyInfo, type IssuedKey } from "@/lib/types";
@@ -157,32 +157,32 @@ export default function KeysPage() {
         ) : keys.length === 0 ? (
           <p className="text-sm text-ink-soft">No keys yet. Generate one to get started.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="label-caps text-ink-soft">
-                <tr className="border-b border-line">
-                  <th className="py-2 pr-4 font-semibold">Key</th>
-                  <th className="py-2 pr-4 font-semibold">Status</th>
-                  <th className="py-2 pr-4 font-semibold">Created</th>
-                  <th className="py-2 font-semibold" />
-                </tr>
-              </thead>
-              <tbody>
+          <TableScroll>
+            <Table>
+              <THead>
+                <TR>
+                  <TH>Key</TH>
+                  <TH>Status</TH>
+                  <TH>Created</TH>
+                  <TH className="text-right">Actions</TH>
+                </TR>
+              </THead>
+              <TBody>
                 {keys.map((k) => (
-                  <tr key={k.key_hash} className="border-b border-line/60 last:border-0">
-                    <td className="py-3 pr-4 font-mono text-ink">{k.key_prefix}</td>
-                    <td className="py-3 pr-4"><Badge tone={k.status === "active" ? "success" : "danger"}>{k.status}</Badge></td>
-                    <td className="py-3 pr-4 text-ink-soft">{k.created_at ? new Date(k.created_at).toLocaleDateString() : "-"}</td>
-                    <td className="py-3 text-right">
+                  <TR key={k.key_hash}>
+                    <TD className="font-mono">{k.key_prefix}</TD>
+                    <TD><Badge tone={k.status === "active" ? "success" : "danger"}>{k.status}</Badge></TD>
+                    <TD className="text-ink-soft">{k.created_at ? new Date(k.created_at).toLocaleDateString() : "-"}</TD>
+                    <TD className="text-right">
                       {k.status === "active" && (
                         <Button variant="secondary" loading={busyHash === k.key_hash} onClick={() => onRevoke(k.key_hash)} type="button">Revoke</Button>
                       )}
-                    </td>
-                  </tr>
+                    </TD>
+                  </TR>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TBody>
+            </Table>
+          </TableScroll>
         )}
       </Card>
     </div>

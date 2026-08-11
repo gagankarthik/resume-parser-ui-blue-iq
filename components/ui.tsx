@@ -1,14 +1,29 @@
-// Shared, presentational UI primitives for the "editorial document" theme.
-// Warm paper, ink, evergreen accent. Pure Tailwind, no external deps.
+// Blue-IQ UI primitives: cool paper, navy ink, deep-blue accent. Pure Tailwind,
+// no external deps.
+//
+// The product platform and the UAT console keep their own copies of these
+// primitives on purpose — each app stays self-contained — but they are written to
+// LOOK identical. If you change a primitive's appearance here, mirror it in the
+// other app so the two keep reading as one product.
 "use client";
 
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from "react";
+import type {
+  ButtonHTMLAttributes,
+  InputHTMLAttributes,
+  ReactNode,
+  SelectHTMLAttributes,
+  TextareaHTMLAttributes,
+  ThHTMLAttributes,
+  TdHTMLAttributes,
+} from "react";
 
 export function cn(...parts: Array<string | false | null | undefined>): string {
   return parts.filter(Boolean).join(" ");
 }
 
-/** Brand monogram - a document being parsed into structured lines. */
+/* ── Brand ─────────────────────────────────────────────────────────────────── */
+
+/** Brand monogram — a document being parsed into structured lines. */
 export function BrandMark({ className = "h-9 w-9" }: { className?: string }) {
   return (
     <span
@@ -26,29 +41,32 @@ export function BrandMark({ className = "h-9 w-9" }: { className?: string }) {
   );
 }
 
-/** Wordmark lockup: monogram + name in the editorial serif. */
-export function Wordmark({ className }: { className?: string }) {
+/** Wordmark lockup: monogram + name in the display grotesque. */
+export function Wordmark({ className, suffix }: { className?: string; suffix?: string }) {
   return (
     <span className={cn("flex items-center gap-2.5", className)}>
       <BrandMark className="h-8 w-8" />
       <span className="font-display text-[1.05rem] font-semibold tracking-tight text-ink">
         Blue<span className="text-accent-700">·</span>IQ Parser
+        {suffix && <span className="ml-1.5 font-sans text-sm font-normal text-ink-soft">{suffix}</span>}
       </span>
     </span>
   );
 }
 
-/** Real brand lockup (public/logo.svg) - use wherever the logo should appear. */
+/** Real brand lockup (public/logo.svg) — use wherever the logo should appear. */
 export function Logo({ className = "h-7 w-auto" }: { className?: string }) {
   // eslint-disable-next-line @next/next/no-img-element
   return <img src="/logo.svg" alt="Blue-IQ" className={className} />;
 }
 
+/* ── Surfaces ──────────────────────────────────────────────────────────────── */
+
 export function Card({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div
       className={cn(
-        "rounded-2xl border border-line bg-surface p-6 shadow-[0_1px_2px_rgba(10,23,51,0.04),0_8px_24px_-16px_rgba(10,23,51,0.16)]",
+        "rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(10,23,51,0.04),0_8px_24px_-16px_rgba(10,23,51,0.16)] sm:p-6",
         className,
       )}
     >
@@ -65,6 +83,29 @@ export function SectionTitle({ children, hint }: { children: ReactNode; hint?: s
     </div>
   );
 }
+
+/** Page header: title, optional description, optional right-hand actions. */
+export function PageHeader({
+  title,
+  description,
+  actions,
+}: {
+  title: string;
+  description?: string;
+  actions?: ReactNode;
+}) {
+  return (
+    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="min-w-0">
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-ink">{title}</h1>
+        {description && <p className="mt-1 max-w-2xl text-sm text-ink-soft">{description}</p>}
+      </div>
+      {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}
+    </div>
+  );
+}
+
+/* ── Controls ──────────────────────────────────────────────────────────────── */
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary" | "danger" | "ghost";
@@ -108,6 +149,34 @@ export function Input({ className, ...rest }: InputHTMLAttributes<HTMLInputEleme
   );
 }
 
+export function Textarea({ className, ...rest }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <textarea
+      className={cn(
+        "w-full rounded-xl border border-line-strong bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition-colors",
+        "placeholder:text-ink-soft/60 focus:border-accent-500 focus:ring-4 focus:ring-accent-500/10",
+        className,
+      )}
+      {...rest}
+    />
+  );
+}
+
+export function Select({ className, children, ...rest }: SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <select
+      className={cn(
+        "h-10 rounded-lg border border-line-strong bg-surface px-3 text-sm text-ink outline-none transition-colors",
+        "focus:border-accent-500 focus:ring-4 focus:ring-accent-500/10",
+        className,
+      )}
+      {...rest}
+    >
+      {children}
+    </select>
+  );
+}
+
 export function Label({ children }: { children: ReactNode }) {
   return <label className="mb-1.5 block text-sm font-medium text-ink">{children}</label>;
 }
@@ -124,6 +193,8 @@ export function Spinner({ className }: { className?: string }) {
   );
 }
 
+/* ── Status ────────────────────────────────────────────────────────────────── */
+
 export function Badge({
   children,
   tone = "neutral",
@@ -133,7 +204,7 @@ export function Badge({
 }) {
   const tones: Record<string, string> = {
     neutral: "bg-black/[0.05] text-ink-soft ring-line",
-    success: "bg-accent-50 text-accent-700 ring-accent-200",
+    success: "bg-emerald-50 text-emerald-800 ring-emerald-200",
     warning: "bg-amber-100 text-amber-800 ring-amber-200",
     danger: "bg-red-100 text-red-700 ring-red-200",
     info: "bg-accent-50 text-accent-700 ring-accent-200",
@@ -141,11 +212,29 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md px-2 py-0.5 font-mono text-[0.7rem] font-medium ring-1 ring-inset",
+        "inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[0.7rem] font-medium ring-1 ring-inset",
         tones[tone],
       )}
     >
       {children}
+    </span>
+  );
+}
+
+/** Job/run state as a labelled dot — state is never carried by colour alone. */
+export function StatusDot({ state }: { state: "completed" | "partial" | "failed" | "processing" | "queued" }) {
+  const map: Record<string, { tone: string; label: string }> = {
+    completed: { tone: "bg-[var(--viz-good)]", label: "Completed" },
+    partial: { tone: "bg-[var(--viz-warning)]", label: "Partial" },
+    failed: { tone: "bg-[var(--viz-critical)]", label: "Failed" },
+    processing: { tone: "bg-[var(--viz-1)]", label: "Processing" },
+    queued: { tone: "bg-ink-soft/50", label: "Queued" },
+  };
+  const s = map[state] ?? map.queued;
+  return (
+    <span className="inline-flex items-center gap-1.5 text-sm text-ink">
+      <span className={cn("h-2 w-2 shrink-0 rounded-full", s.tone)} aria-hidden />
+      {s.label}
     </span>
   );
 }
@@ -158,5 +247,153 @@ export function ErrorBanner({ message }: { message: string }) {
       </svg>
       <span>{message}</span>
     </div>
+  );
+}
+
+export function EmptyState({
+  title,
+  hint,
+  action,
+}: {
+  title: string;
+  hint?: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="grid place-items-center gap-2 px-6 py-12 text-center">
+      <p className="font-display text-sm font-semibold text-ink">{title}</p>
+      {hint && <p className="max-w-sm text-sm text-ink-soft">{hint}</p>}
+      {action && <div className="mt-2">{action}</div>}
+    </div>
+  );
+}
+
+export function Skeleton({ className }: { className?: string }) {
+  return <div className={cn("animate-pulse rounded-md bg-black/[0.06]", className)} aria-hidden />;
+}
+
+/* ── Data tables ───────────────────────────────────────────────────────────────
+   A table is the densest thing on any of these screens, so the primitives carry
+   the rules rather than each page re-inventing them: the wrapper is the ONLY
+   horizontally-scrolling element (the page body never scrolls sideways on
+   mobile), the header is sticky, numerics are tabular and right-aligned, and
+   rows are separated by hairlines rather than zebra fills. ──────────────────── */
+
+/** Scroll container + frame — for a table that stands on its own. */
+export function TableWrap({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div className={cn("overflow-hidden rounded-2xl border border-line bg-surface", className)}>
+      <div className="scroll-fine max-w-full overflow-x-auto">{children}</div>
+    </div>
+  );
+}
+
+/** Scroll container WITHOUT a frame — for a table already inside a <Card>, so
+ *  the card supplies the only border. Bleeds to the card's edges on small
+ *  screens so the scrollable region spans the full width. */
+export function TableScroll({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div
+      className={cn(
+        "scroll-fine -mx-5 max-w-[calc(100%+2.5rem)] overflow-x-auto px-5 sm:-mx-6 sm:max-w-[calc(100%+3rem)] sm:px-6",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function Table({ children, className }: { children: ReactNode; className?: string }) {
+  return <table className={cn("w-full min-w-[36rem] border-collapse text-sm", className)}>{children}</table>;
+}
+
+export function THead({ children }: { children: ReactNode }) {
+  return (
+    <thead className="sticky top-0 z-10 bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
+      {children}
+    </thead>
+  );
+}
+
+export function TBody({ children }: { children: ReactNode }) {
+  return <tbody className="divide-y divide-line">{children}</tbody>;
+}
+
+export function TR({
+  children,
+  className,
+  onClick,
+}: {
+  children: ReactNode;
+  className?: string;
+  onClick?: () => void;
+}) {
+  return (
+    <tr
+      onClick={onClick}
+      className={cn(
+        "transition-colors",
+        onClick && "cursor-pointer hover:bg-accent-50/60",
+        !onClick && "hover:bg-black/[0.015]",
+        className,
+      )}
+    >
+      {children}
+    </tr>
+  );
+}
+
+type CellProps = { numeric?: boolean; className?: string; children?: ReactNode };
+
+export function TH({
+  children,
+  numeric,
+  className,
+  ...rest
+}: CellProps & ThHTMLAttributes<HTMLTableCellElement>) {
+  return (
+    <th
+      scope="col"
+      className={cn(
+        "label-caps whitespace-nowrap border-b border-line px-4 py-3 text-ink-soft",
+        numeric ? "text-right" : "text-left",
+        className,
+      )}
+      {...rest}
+    >
+      {children}
+    </th>
+  );
+}
+
+export function TD({
+  children,
+  numeric,
+  className,
+  ...rest
+}: CellProps & TdHTMLAttributes<HTMLTableCellElement>) {
+  return (
+    <td
+      className={cn(
+        "px-4 py-3 align-middle text-ink",
+        numeric && "text-right font-mono tabular-nums",
+        className,
+      )}
+      {...rest}
+    >
+      {children}
+    </td>
+  );
+}
+
+/** Full-width state row (empty / loading) spanning every column. */
+export function TStateRow({ colSpan, children }: { colSpan: number; children: ReactNode }) {
+  return (
+    <tr>
+      <td colSpan={colSpan} className="px-4 py-0">
+        {children}
+      </td>
+    </tr>
   );
 }

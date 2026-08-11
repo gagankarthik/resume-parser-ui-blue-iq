@@ -2,12 +2,38 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { BackButton } from "@/components/BackButton";
-import { Logo } from "@/components/ui";
+import {
+  Logo,
+  TBody,
+  TD,
+  TH,
+  THead,
+  TR,
+  Table as UITable,
+  TableWrap,
+} from "@/components/ui";
 import { API_BASE } from "@/lib/config";
 
 export const metadata = {
-  title: "Docs - Blue-IQ Parser API",
-  description: "How to authenticate and use your Blue-IQ Parser API keys.",
+  title: "API documentation",
+  description:
+    "Blue-IQ Capture API reference: authenticate with an API key, submit a document, poll the job to completion, and read the structured, confidence-scored JSON. Includes webhook delivery and error codes.",
+  keywords: [
+    "Blue-IQ Capture API",
+    "document parsing API",
+    "resume parsing API",
+    "structured data extraction",
+    "API documentation",
+    "webhook delivery",
+  ],
+  alternates: { canonical: "/docs" },
+  openGraph: {
+    title: "API documentation · Blue-IQ Capture",
+    description:
+      "Authenticate, submit a document, poll for structured JSON. The full Blue-IQ Capture API reference.",
+    url: "/docs",
+    type: "article",
+  },
 };
 
 const SECTIONS = [
@@ -439,29 +465,31 @@ function Code({ children }: { children: string }) {
   );
 }
 
+/** Reference table for the docs prose — the first column is the identifier
+ *  (field/param/code), so it wears mono ink while the rest stays secondary. */
 function Table({ head, rows }: { head: string[]; rows: string[][] }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-line">
-      <table className="w-full min-w-[22rem] text-left text-sm">
-        <thead className="label-caps bg-black/[0.025] text-ink-soft">
-          <tr>
+    <TableWrap className="rounded-xl">
+      <UITable className="min-w-[22rem]">
+        <THead>
+          <TR>
             {head.map((h) => (
-              <th key={h} className="px-4 py-2.5 font-semibold">{h}</th>
+              <TH key={h}>{h}</TH>
             ))}
-          </tr>
-        </thead>
-        <tbody>
+          </TR>
+        </THead>
+        <TBody>
           {rows.map((r, i) => (
-            <tr key={i} className="border-t border-line">
+            <TR key={i}>
               {r.map((c, j) => (
-                <td key={j} className="px-4 py-2.5 text-ink-soft">
-                  {j === 0 ? <span className="font-mono text-xs text-ink">{c}</span> : c}
-                </td>
+                <TD key={j} className={j === 0 ? "font-mono text-xs" : "text-ink-soft"}>
+                  {c}
+                </TD>
               ))}
-            </tr>
+            </TR>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </TBody>
+      </UITable>
+    </TableWrap>
   );
 }

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { UsersIcon } from "@/components/icons";
-import { Button, ErrorBanner, Spinner } from "@/components/ui";
+import { Badge, Button, EmptyState, ErrorBanner, Spinner, TBody, TD, TH, THead, TR, Table } from "@/components/ui";
 import { getPlatformStats } from "@/lib/account";
 import { ApiError, type PlatformStats } from "@/lib/types";
 
@@ -114,45 +114,44 @@ export default function CustomersClient() {
           </div>
 
           {rows.length === 0 ? (
-            <div className="grid h-24 place-items-center text-sm text-ink-soft/70">No customers found</div>
+            <EmptyState title="No customers found" hint="Try a different search term or clear the filter." />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[44rem] text-left text-sm">
-                <thead className="label-caps bg-black/[0.015] text-ink-soft">
-                  <tr>
-                    <th className="px-5 py-2.5 font-semibold">Customer</th>
-                    <th className="px-4 py-2.5 font-semibold">Plan</th>
-                    <th className="px-4 py-2.5 font-semibold">Status</th>
-                    <th className="px-4 py-2.5 text-right font-semibold">Jobs</th>
-                    <th className="px-4 py-2.5 text-right font-semibold">Tokens</th>
-                    <th className="px-4 py-2.5 text-right font-semibold">Keys</th>
-                    <th className="px-5 py-2.5 font-semibold">Last active</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <div className="scroll-fine max-w-full overflow-x-auto">
+              <Table className="min-w-[44rem]">
+                <THead>
+                  <TR>
+                    <TH>Customer</TH>
+                    <TH>Plan</TH>
+                    <TH>Status</TH>
+                    <TH numeric>Jobs</TH>
+                    <TH numeric>Tokens</TH>
+                    <TH numeric>Keys</TH>
+                    <TH>Last active</TH>
+                  </TR>
+                </THead>
+                <TBody>
                   {rows.map((c) => (
-                    <tr key={c.company_id} className="border-t border-line transition-colors hover:bg-black/[0.02]">
-                      <td className="px-5 py-3">
+                    <TR key={c.company_id}>
+                      <TD>
                         <Link href={`/dashboard/admin/customers/${encodeURIComponent(c.company_id)}`} className="font-medium text-accent-700 hover:underline">
                           {c.name}
                         </Link>
                         <div className="truncate text-[11px] text-ink-soft">{c.email || c.company_id}</div>
-                      </td>
-                      <td className="px-4 py-3 text-ink-soft">{c.plan || "free"}</td>
-                      <td className="px-4 py-3">
-                        <span className={"inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium " + (c.status !== "disabled" ? "bg-accent-50 text-accent-700" : "bg-rose-50 text-rose-600")}>
-                          <span className={"h-1.5 w-1.5 rounded-full " + (c.status !== "disabled" ? "bg-accent-600" : "bg-rose-500")} />
+                      </TD>
+                      <TD className="text-ink-soft">{c.plan || "free"}</TD>
+                      <TD>
+                        <Badge tone={c.status !== "disabled" ? "success" : "danger"}>
                           {c.status === "disabled" ? "Disabled" : "Active"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono tabular-nums text-ink">{c.jobs.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-right font-mono tabular-nums text-ink">{c.tokens.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-right font-mono tabular-nums text-ink-soft">{c.active_keys}</td>
-                      <td className="px-5 py-3 font-mono text-xs text-ink-soft">{c.last_active ? c.last_active.slice(0, 10) : "-"}</td>
-                    </tr>
+                        </Badge>
+                      </TD>
+                      <TD numeric>{c.jobs.toLocaleString()}</TD>
+                      <TD numeric>{c.tokens.toLocaleString()}</TD>
+                      <TD numeric className="text-ink-soft">{c.active_keys}</TD>
+                      <TD className="font-mono text-xs text-ink-soft">{c.last_active ? c.last_active.slice(0, 10) : "-"}</TD>
+                    </TR>
                   ))}
-                </tbody>
-              </table>
+                </TBody>
+              </Table>
             </div>
           )}
         </div>

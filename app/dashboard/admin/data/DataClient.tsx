@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { Button, Input, cn } from "@/components/ui";
+import { ChevronIcon } from "@/components/icons";
+import { Button, EmptyState, Input, TBody, TD, TH, THead, TR, Table, TableWrap, cn } from "@/components/ui";
 
 interface TableRef {
   id: string;
@@ -191,27 +192,30 @@ export default function DataClient({ tables }: { tables: TableRef[] }) {
 
       {!error && !raw && data && (
         filtered.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-line px-4 py-10 text-center text-sm text-ink-soft">
-            {items.length === 0 ? "This table is empty." : "No rows match your filter."}
-          </p>
+          <div className="rounded-xl border border-dashed border-line">
+            <EmptyState
+              title={items.length === 0 ? "This table is empty." : "No rows match your filter."}
+              hint={items.length === 0 ? undefined : "Clear the filter to see all rows."}
+            />
+          </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-line bg-surface shadow-sm">
-            <table className="w-full min-w-[42rem] border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-line bg-paper/60">
-                  <th className="w-8" />
+          <TableWrap>
+            <Table className="min-w-[42rem]">
+              <THead>
+                <TR>
+                  <TH className="w-8" aria-label="Expand row" />
                   {columns.map((c) => (
-                    <th key={c} className="whitespace-nowrap px-3 py-2.5 text-left font-mono text-[11px] font-semibold uppercase tracking-wide text-ink-soft">{c}</th>
+                    <TH key={c} className="font-mono normal-case tracking-wide">{c}</TH>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
+                </TR>
+              </THead>
+              <TBody>
                 {filtered.map((it, i) => (
                   <Row key={i} item={it} columns={columns} open={expanded === i} onToggle={() => setExpanded(expanded === i ? null : i)} />
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TBody>
+            </Table>
+          </TableWrap>
         )
       )}
     </div>
@@ -221,14 +225,14 @@ export default function DataClient({ tables }: { tables: TableRef[] }) {
 function Row({ item, columns, open, onToggle }: { item: Record<string, unknown>; columns: string[]; open: boolean; onToggle: () => void }) {
   return (
     <>
-      <tr className="cursor-pointer border-b border-line/70 transition-colors hover:bg-accent-50/50" onClick={onToggle}>
-        <td className="px-2 text-center text-ink-soft">
-          <svg className={cn("inline h-3.5 w-3.5 transition-transform", open && "rotate-90")} viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        </td>
+      <TR onClick={onToggle}>
+        <TD className="px-2 text-center text-ink-soft">
+          <ChevronIcon width={14} height={14} className={cn("inline transition-transform", open && "rotate-90")} />
+        </TD>
         {columns.map((c) => (
-          <td key={c} className="max-w-[16rem] truncate px-3 py-2 font-mono text-[12px] text-ink" title={cellText(item[c])}>{cellText(item[c])}</td>
+          <TD key={c} className="max-w-[16rem] truncate px-3 py-2 font-mono text-[12px]" title={cellText(item[c])}>{cellText(item[c])}</TD>
         ))}
-      </tr>
+      </TR>
       {open && (
         <tr className="bg-paper/40">
           <td colSpan={columns.length + 1} className="px-3 py-3"><JsonBlock value={item} max="max-h-96" /></td>
