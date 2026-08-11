@@ -2,15 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import {
-  DatabaseIcon,
-  DocsIcon,
-  GaugeIcon,
-  KeyIcon,
-  ShieldIcon,
-  SuccessIcon,
-  UsersIcon,
-} from "@/components/icons";
 import { API_BASE } from "@/lib/config";
 import { getSessionClaims } from "@/lib/session";
 import { SiteNav } from "@/components/landing/SiteNav";
@@ -551,231 +542,325 @@ function ArtDeliver() {
   );
 }
 
-/* ── Why it is more than a parser ────────────────────────────────────────── */
+/* ── Shared panel chrome ─────────────────────────────────────────────────────
+   The Core Features cards work because each one contains a small working
+   mock-up of the thing it describes and the heading sits underneath it. These
+   are the same card: fixed height, content bottom-aligned, a radial gradient
+   that saturates at the top and falls away to the neutral floor, and a real
+   HTML mock-up floating in the upper half. Not an icon above a title.
+   ────────────────────────────────────────────────────────────────────────────── */
 
-/** A bento of five gradient panels: one wide lead claim, then four supporting
- *  ones. Same chrome as the stages so the page reads as one system. */
-function MoreThanParser() {
-  const rest: { tag: string; h: string; p: string; bg: string; icon: ReactNode }[] = [
-    {
-      tag: "confidence",
-      h: "Confidence on every field",
-      p: "Every value carries a number. Review the weak ones, ship the rest.",
-      bg: "linear-gradient(168deg, #e2ebc9 0%, #eaf0c6 55%, #f2f4b4 100%)",
-      icon: <GaugeIcon />,
-    },
-    {
-      tag: "no_fabrication",
-      h: "Never fabricates",
-      p: "No value beats a wrong value. Unsure fields come back null, flagged.",
-      bg: "linear-gradient(135deg, #f9d9e9 0%, #fbdfec 55%, #fce6f1 100%)",
-      icon: <ShieldIcon />,
-    },
-    {
-      tag: "human_review",
-      h: "Human-in-the-loop by design",
-      p: "Pick a threshold. Anything under it goes to a person. Everything over it just goes.",
-      bg: "linear-gradient(103deg, #eae9f5 0%, #e2e0f1 40%, #cfcdea 100%)",
-      icon: <UsersIcon />,
-    },
-    {
-      tag: "schema_valid",
-      h: "Schema-validated output",
-      p: "JSON that matches your schema on arrival. Not a wall of text to untangle later.",
-      bg: "linear-gradient(180deg, #f9f1e8 0%, #fbeee0 60%, #fdeadb 100%)",
-      icon: <SuccessIcon />,
-    },
-  ];
+const LIFT = { boxShadow: "0 8px 20px rgba(0,0,0,.05)" } as const;
 
+function MockPanel({
+  gradient,
+  title,
+  body,
+  children,
+}: {
+  gradient: string;
+  title: string;
+  body: string;
+  children: ReactNode;
+}) {
   return (
-    <section id="why" className="bg-paper" aria-label="More than a parser">
-      <div className="mx-auto max-w-7xl px-5 py-20 sm:px-6 lg:py-28">
-        <SectionHead
-          title="Most parsers guess. This one admits what it does not know."
-          lede="A generic model flattens a credential into word salad and fills the gaps with something plausible. Capture reads the documents your business actually runs on, and puts a number on its own certainty."
-        />
-
-        <div className="mt-12 grid gap-5 lg:grid-cols-3">
-          {/* Lead panel: the claim the rest support, given the width to say it. */}
-          <Reveal className="lg:col-span-3">
-            <article
-              className="relative grid gap-8 overflow-hidden rounded-[22px] p-8 lg:grid-cols-[1.05fr_0.95fr] lg:p-10"
-              style={{
-                background:
-                  "radial-gradient(90% 70% at 6% 0%, rgba(226,236,200,.9) 0%, rgba(226,236,200,0) 70%), linear-gradient(168deg, #e2ebc9 0%, #e9f0c4 48%, #f0f4b8 78%, #f3f5b0 100%)",
-                border: "1.6px solid rgba(255,255,255,.92)",
-                boxShadow: "0 2px 16px rgba(24,30,45,.045)",
-              }}
-            >
-              <div>
-                <StageTag>domain_tuned</StageTag>
-                <h3 className="mt-5 font-display text-[26px] font-extrabold leading-[1.14] tracking-[-0.03em] text-[#15201a] sm:text-[30px]">
-                  Domain-tuned extraction
-                </h3>
-                <p className="mt-3 max-w-lg text-[15.5px] leading-relaxed text-[#1e2a1b]/80">
-                  A licence number, a governing-law clause, a line item with the wrong tax code.
-                  Capture knows what those are. It learned the paperwork, not text in the abstract.
-                </p>
-              </div>
-              <ArtDomainTuned />
-            </article>
-          </Reveal>
-
-          {rest.map((r, i) => (
-            <Reveal key={r.tag} delay={(i + 1) * 70} className={i === 0 ? "lg:col-span-2" : ""}>
-              <article
-                className="relative flex h-full flex-col overflow-hidden rounded-[22px] p-7"
-                style={{
-                  background: r.bg,
-                  border: "1.6px solid rgba(255,255,255,.92)",
-                  boxShadow: "0 2px 16px rgba(24,30,45,.045)",
-                }}
-              >
-                <PanelIcon>{r.icon}</PanelIcon>
-                <div className="mt-5"><StageTag>{r.tag}</StageTag></div>
-                <h3 className="mt-4 font-display text-[21px] font-extrabold leading-[1.16] tracking-[-0.028em] text-[#0d0d10]">
-                  {r.h}
-                </h3>
-                <p className="mt-2.5 text-[15px] leading-relaxed text-[#2b2b2b]/80">{r.p}</p>
-              </article>
-            </Reveal>
-          ))}
-        </div>
+    <article
+      className="relative flex h-[352px] flex-col justify-end overflow-hidden rounded-[20px] text-left"
+      style={{ background: gradient, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.1)" }}
+    >
+      {children}
+      <div className="relative z-[2] p-6">
+        <h3 className="text-[1.05rem] font-semibold text-[#1e293b]">{title}</h3>
+        <p className="mt-1.5 text-[13.5px] leading-relaxed text-[#1e293b]/65">{body}</p>
       </div>
-    </section>
+    </article>
   );
 }
 
-/** One container for every panel icon: same size, same ring, same optical
- *  weight, so the icons read as a set instead of eight separate drawings. */
-function PanelIcon({ children }: { children: ReactNode }) {
+/** A white card floating in the upper half, as on the reference cards. */
+function MockCard({ className, children }: { className?: string; children: ReactNode }) {
+  return (
+    <div
+      className={"absolute left-6 right-6 rounded-xl bg-white p-4 " + (className ?? "top-7")}
+      style={LIFT}
+    >
+      {children}
+    </div>
+  );
+}
+
+function MockPill({ className, children }: { className?: string; children: ReactNode }) {
   return (
     <span
-      className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-[13px] bg-white/90 text-[#15201a] backdrop-blur-[7px]"
-      style={{ boxShadow: "0 0 0 3px rgba(0,0,0,.047)" }}
+      className={
+        "absolute inline-flex items-center gap-1.5 rounded-full border border-black bg-white px-3.5 py-[5px] text-[0.75rem] font-semibold text-[#1e293b] " +
+        (className ?? "")
+      }
+      style={{ boxShadow: "0 4px 15px rgba(0,0,0,0.08)" }}
     >
       {children}
     </span>
   );
 }
 
-/** The mono tag chip shared by the claim panels - ring, not border. */
-function StageTag({ children }: { children: ReactNode }) {
+/** One extracted field with its score bar - the mock-up used by several panels. */
+function MockField({ label, value, score }: { label: string; value: string; score: number }) {
   return (
-    <code
-      className="inline-flex h-[30px] w-fit items-center rounded-full bg-white/85 px-[14px] font-mono text-[11.5px] text-[#151515] backdrop-blur-[7px]"
-      style={{ boxShadow: "0 0 0 3px rgba(0,0,0,.047)" }}
-    >
-      {children}
-    </code>
+    <div>
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="font-mono text-[10.5px] text-[#64748b]">{label}</span>
+        <span className="font-mono text-[10.5px] tabular-nums text-[#94a3b8]">{score.toFixed(2)}</span>
+      </div>
+      <div className="mt-1 truncate text-[12.5px] font-medium text-[#1e293b]">{value}</div>
+      <div className="mt-1.5 h-[5px] overflow-hidden rounded-full bg-[#1e293b]/[0.07]">
+        <div
+          className="h-full rounded-full"
+          style={{
+            width: `${score * 100}%`,
+            background: score >= 0.9 ? "#5f8b3e" : score >= 0.8 ? "#c9920c" : "#c2410c",
+          }}
+        />
+      </div>
+    </div>
   );
 }
 
-/** Generic model vs Capture, on the same line of a resume. */
-function ArtDomainTuned() {
+/* ── Why it is more than a parser ────────────────────────────────────────── */
+
+const G_LIME = "radial-gradient(circle at 50% 0%, #F9ED96 0%, #E2EBC9 32%, #F4F8F9 62%, #F4F8F9 100%)";
+const G_PINK = "radial-gradient(circle at 50% 0%, #FFB347 0%, #F9D9E9 30%, #F4F8F9 60%, #F4F8F9 100%)";
+const G_LILAC = "radial-gradient(circle at 50% 0%, #E5A1F5 0%, #CFCDEA 32%, #F4F8F9 62%, #F4F8F9 100%)";
+const G_PEACH = "radial-gradient(circle at 50% 0%, #F8ACA0 0%, #FDEADB 32%, #F4F8F9 62%, #F4F8F9 100%)";
+const G_SKY = "radial-gradient(circle at 50% 0%, #A9D3E8 0%, #CEDCE4 32%, #F4F8F9 62%, #F4F8F9 100%)";
+
+function MoreThanParser() {
   return (
-    <div className="space-y-3 self-center">
-      {[
-        { label: "Generic model", value: "RN BSN Med Surg Tele Fort Sanders", muted: true },
-        { label: "Capture", value: null, muted: false },
-      ].map((row) =>
-        row.muted ? (
-          <div
-            key={row.label}
-            className="rounded-[11px] bg-white/55 p-4 backdrop-blur-[7px]"
-            style={{ boxShadow: "0 0 0 3px rgba(0,0,0,.035)" }}
-          >
-            <span className="font-mono text-[10.5px] text-[#4a5533]/70">{row.label}</span>
-            <p className="mt-1.5 truncate font-mono text-[12.5px] text-[#15201a]/45">{row.value}</p>
-          </div>
-        ) : (
-          <div
-            key={row.label}
-            className="rounded-[11px] bg-white/92 p-4 backdrop-blur-[7px]"
-            style={{ boxShadow: "0 12px 28px rgba(64,74,44,.16)" }}
-          >
-            <span className="font-mono text-[10.5px] text-[#4a5533]">{row.label}</span>
-            <dl className="mt-2 space-y-1.5">
-              {[
-                ["profession", "RN", "1.00"],
-                ["credentials", "BSN", "1.00"],
-                ["specialty", "Med Surg / Tele", "0.94"],
-                ["facility", "Fort Sanders Regional", "0.88"],
-              ].map(([k, v, s]) => (
-                <div key={k} className="flex items-baseline gap-2 font-mono text-[12px]">
-                  <dt className="w-[92px] shrink-0 text-[#4a5533]/70">{k}</dt>
-                  <dd className="truncate font-sans font-medium text-[#15201a]">{v}</dd>
-                  <span className="ml-auto tabular-nums text-[#4a5533]/60">{s}</span>
+    <section id="why" className="bg-paper" aria-label="More than a parser">
+      <div className="mx-auto max-w-7xl px-5 py-20 sm:px-6 lg:py-28">
+        <SectionHead
+          title="Most parsers guess. This one admits what it does not know."
+          lede="A generic model flattens a credential into word salad and fills the gaps with something plausible. Capture reads the documents your business actually runs on, and puts a number on its own certainty."
+          centered
+        />
+
+        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <Reveal>
+            <MockPanel
+              gradient={G_LIME}
+              title="Confidence on every field"
+              body="Every value carries a number. Review the weak ones, ship the rest."
+            >
+              <MockCard>
+                <div className="space-y-3">
+                  <MockField label="profession" value="RN" score={1.0} />
+                  <MockField label="specialty" value="Med Surg / Tele" score={0.94} />
+                  <MockField label="facility" value="Fort Sanders Regional" score={0.82} />
                 </div>
-              ))}
-            </dl>
-          </div>
-        ),
-      )}
-    </div>
+              </MockCard>
+            </MockPanel>
+          </Reveal>
+
+          <Reveal delay={70}>
+            <MockPanel
+              gradient={G_PINK}
+              title="Never fabricates"
+              body="No value beats a wrong value. Unsure fields come back null, flagged."
+            >
+              <MockCard>
+                <div className="space-y-2.5 font-mono text-[12px]">
+                  {[
+                    ["state", "TN", false],
+                    ["licence_no", "null", true],
+                    ["expires", "null", true],
+                  ].map(([k, v, isNull]) => (
+                    <div key={k as string} className="flex items-baseline justify-between gap-2">
+                      <span className="text-[#64748b]">{k as string}</span>
+                      <span className={isNull ? "font-semibold text-[#c2410c]" : "text-[#1e293b]"}>
+                        {v as string}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </MockCard>
+              <MockPill className="left-8 top-[186px]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#c2410c]" />2 flagged for review
+              </MockPill>
+            </MockPanel>
+          </Reveal>
+
+          <Reveal delay={140}>
+            <MockPanel
+              gradient={G_LILAC}
+              title="Human-in-the-loop by design"
+              body="Pick a threshold. Anything under it goes to a person. Everything over it just goes."
+            >
+              <MockCard>
+                <div className="flex items-baseline justify-between">
+                  <span className="font-mono text-[10.5px] text-[#64748b]">threshold</span>
+                  <span className="font-mono text-[11px] font-semibold text-[#1e293b]">0.85</span>
+                </div>
+                <div className="relative mt-3 h-[5px] rounded-full bg-[#1e293b]/[0.07]">
+                  <div className="h-full w-[85%] rounded-full bg-[#6d28d9]" />
+                  <span className="absolute -top-[5px] left-[85%] h-[15px] w-[15px] -translate-x-1/2 rounded-full border-2 border-[#6d28d9] bg-white" />
+                </div>
+                <div className="mt-4 flex items-center justify-between text-[11.5px]">
+                  <span className="inline-flex items-center gap-1.5 text-[#64748b]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#94a3b8]" />
+                    12 to review
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 font-medium text-[#1e293b]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#5f8b3e]" />
+                    488 auto
+                  </span>
+                </div>
+              </MockCard>
+            </MockPanel>
+          </Reveal>
+
+          <Reveal delay={210}>
+            <MockPanel
+              gradient={G_PEACH}
+              title="Schema-validated output"
+              body="JSON that matches your schema on arrival. Not a wall of text to untangle later."
+            >
+              <MockCard>
+                <pre className="overflow-hidden font-mono text-[11px] leading-[1.7] text-[#475569]">
+{`{
+  "profession": "RN",
+  "specialty_id": "88",
+  "confidence": 0.94
+}`}
+                </pre>
+              </MockCard>
+              <MockPill className="left-8 top-[186px]">
+                <svg viewBox="0 0 24 24" width={13} height={13} fill="none" aria-hidden>
+                  <path d="M5 12.5l4.5 4.5L19 7" stroke="#5f8b3e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Schema valid
+              </MockPill>
+            </MockPanel>
+          </Reveal>
+        </div>
+      </div>
+    </section>
   );
 }
 
 /* ── Trust & security ────────────────────────────────────────────────────── */
 
 function Trust() {
-  const measures: { t: string; d: string; bg: string; icon: ReactNode }[] = [
-    {
-      t: "Encryption in transit",
-      d: "TLS on every request, authenticated by a per-workspace key you can rotate whenever you like.",
-      icon: <KeyIcon />,
-      bg: "linear-gradient(180deg, #fcfdfd 0%, #f4f7f9 35%, #e2ebef 100%)",
-    },
-    {
-      t: "Workspace isolation",
-      d: "Documents and keys never leave their workspace. Role-based access and SSO on top.",
-      icon: <ShieldIcon />,
-      bg: "linear-gradient(103deg, #eae9f5 0%, #e2e0f1 45%, #cfcdea 100%)",
-    },
-    {
-      t: "Zero-retention option",
-      d: "Switch on zero retention and the document is parsed in memory and gone. Nothing stored is nothing to leak.",
-      icon: <DatabaseIcon />,
-      bg: "linear-gradient(168deg, #e2ebc9 0%, #eaf0c6 55%, #f2f4b4 100%)",
-    },
-    {
-      t: "Content-free audit trail",
-      d: "We log that a parse happened, how long it took and what it cost. Never a word of what it said.",
-      icon: <DocsIcon />,
-      bg: "linear-gradient(180deg, #f9f1e8 0%, #fbeee0 60%, #fdeadb 100%)",
-    },
-  ];
-
   return (
     <section id="security" className="bg-surface" aria-label="Trust and security">
       <div className="mx-auto max-w-7xl px-5 py-20 sm:px-6 lg:py-28">
-        <div className="text-center">
-          <SectionHead
-            title="These are real people's records. We treat them that way."
-            lede="Clinical histories, signed agreements, salary lines. What you send us is not test data, and the handling reflects that."
-            centered
-          />
-        </div>
+        <SectionHead
+          title="These are real people's records. We treat them that way."
+          lede="Clinical histories, signed agreements, salary lines. What you send us is not test data, and the handling reflects that."
+          centered
+        />
 
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {measures.map((m, i) => (
-            <Reveal key={m.t} delay={i * 70}>
-              <article
-                className="flex h-full flex-col overflow-hidden rounded-[22px] p-7"
-                style={{
-                  background: m.bg,
-                  border: "1.6px solid rgba(255,255,255,.92)",
-                  boxShadow: "0 2px 16px rgba(24,30,45,.045)",
-                }}
-              >
-                <PanelIcon>{m.icon}</PanelIcon>
-                <h3 className="mt-5 font-display text-[18px] font-extrabold leading-[1.2] tracking-[-0.026em] text-[#0d0d10]">
-                  {m.t}
-                </h3>
-                <p className="mt-2.5 text-[14.5px] leading-relaxed text-[#2b2b2b]/80">{m.d}</p>
-              </article>
-            </Reveal>
-          ))}
+        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <Reveal>
+            <MockPanel
+              gradient={G_SKY}
+              title="Encryption in transit"
+              body="TLS on every request, authenticated by a per-workspace key you can rotate whenever you like."
+            >
+              <MockCard>
+                <div className="flex items-center gap-2.5">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#1e293b]/[0.05]">
+                    <svg viewBox="0 0 24 24" width={15} height={15} fill="none" aria-hidden>
+                      <rect x="5" y="10.5" width="14" height="9" rx="2.5" stroke="#1e293b" strokeWidth="1.8" />
+                      <path d="M8.5 10.5V8a3.5 3.5 0 1 1 7 0v2.5" stroke="#1e293b" strokeWidth="1.8" strokeLinecap="round" />
+                    </svg>
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-mono text-[11px] text-[#64748b]">TLS 1.3</p>
+                    <p className="truncate font-mono text-[11.5px] text-[#1e293b]">api.parsinglab.blue-iq.ai</p>
+                  </div>
+                </div>
+                <div className="mt-3 truncate rounded-lg bg-[#1e293b]/[0.04] px-2.5 py-2 font-mono text-[11px] text-[#64748b]">
+                  X-API-Key: rp_live_••••••••
+                </div>
+              </MockCard>
+            </MockPanel>
+          </Reveal>
+
+          <Reveal delay={70}>
+            <MockPanel
+              gradient={G_LILAC}
+              title="Workspace isolation"
+              body="Documents and keys never leave their workspace. Role-based access and SSO on top."
+            >
+              <MockCard>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {["acme", "globex"].map((w, i) => (
+                    <div key={w} className="rounded-lg bg-[#1e293b]/[0.04] p-2.5">
+                      <p className="font-mono text-[10.5px] text-[#64748b]">{w}</p>
+                      <div className="mt-2 space-y-1.5">
+                        <div className="h-[5px] w-full rounded-full bg-[#1e293b]/[0.1]" />
+                        <div className="h-[5px] rounded-full bg-[#1e293b]/[0.1]" style={{ width: i ? "55%" : "70%" }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-3 text-center font-mono text-[10.5px] text-[#94a3b8]">no shared access</p>
+              </MockCard>
+            </MockPanel>
+          </Reveal>
+
+          <Reveal delay={140}>
+            <MockPanel
+              gradient={G_LIME}
+              title="Zero-retention option"
+              body="Switch on zero retention and the document is parsed in memory and gone. Nothing stored is nothing to leak."
+            >
+              <MockCard>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[11px] text-[#64748b]">zero_retention</span>
+                  <span className="relative inline-flex h-[18px] w-[32px] items-center rounded-full bg-[#5f8b3e]">
+                    <span className="absolute right-[2px] h-[14px] w-[14px] rounded-full bg-white" />
+                  </span>
+                </div>
+                <div className="mt-3.5 space-y-2">
+                  {["parsed in memory", "returned to caller", "discarded"].map((t, i) => (
+                    <div key={t} className="flex items-center gap-2 text-[11.5px] text-[#475569]">
+                      <span className={"h-1.5 w-1.5 rounded-full " + (i === 2 ? "bg-[#5f8b3e]" : "bg-[#cbd5e1]")} />
+                      {t}
+                    </div>
+                  ))}
+                </div>
+              </MockCard>
+            </MockPanel>
+          </Reveal>
+
+          <Reveal delay={210}>
+            <MockPanel
+              gradient={G_PEACH}
+              title="Content-free audit trail"
+              body="We log that a parse happened, how long it took and what it cost. Never a word of what it said."
+            >
+              <MockCard>
+                <div className="space-y-2.5 font-mono text-[11px]">
+                  {[
+                    ["duration", "22.7s"],
+                    ["file_type", "pdf"],
+                    ["tokens", "38,905"],
+                    ["content", null],
+                  ].map(([k, v]) => (
+                    <div key={k as string} className="flex items-baseline justify-between gap-2">
+                      <span className="text-[#64748b]">{k as string}</span>
+                      {v ? (
+                        <span className="text-[#1e293b]">{v as string}</span>
+                      ) : (
+                        <span className="h-[9px] w-[62px] rounded-full bg-[#1e293b]/[0.09]" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </MockCard>
+              <MockPill className="left-8 top-[186px]">never logged</MockPill>
+            </MockPanel>
+          </Reveal>
         </div>
       </div>
     </section>

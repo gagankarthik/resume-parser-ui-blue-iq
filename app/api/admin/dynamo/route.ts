@@ -1,5 +1,5 @@
 // Admin-only: scan a resume-parser DynamoDB table and return its contents.
-// Gated by the ADMIN_EMAILS allow-list on the verified session.
+// Gated by membership of the Cognito `admin` group on the verified session.
 import { NextRequest } from "next/server";
 
 import { isCurrentUserAdmin } from "@/lib/admin";

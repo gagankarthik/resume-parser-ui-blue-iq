@@ -1,5 +1,5 @@
 // Platform-wide stats for the admin overview. Restricted to allow-listed
-// operator emails (ADMIN_EMAILS) — verified server-side from the Cognito session.
+// the Cognito `admin` group - verified server-side from the session token.
 import { NextRequest } from "next/server";
 
 import { isCurrentUserAdmin } from "@/lib/admin";
