@@ -327,8 +327,18 @@ function OverviewIcon({ active }: { active?: boolean }) {
 function AnalyticsIcon({ active }: { active?: boolean }) {
   return <svg className={cls} viewBox="0 0 24 24" fill="none"><path d="M4 19V5M4 19h16M8 19v-5M12 19V9M16 19v-7M20 19V6" stroke="currentColor" strokeWidth={active ? 1.9 : 1.7} strokeLinecap="round" strokeLinejoin="round" /></svg>;
 }
+/** Three separate pieces, not one doubling-back path: a true circular bow, a
+ *  straight shaft starting exactly on the bow's edge, and two teeth square to
+ *  the shaft. The old single-path version collapsed into a blob at 18px. */
 function KeyIcon({ active }: { active?: boolean }) {
-  return <svg className={cls} viewBox="0 0 24 24" fill="none"><path d="M15 7a4 4 0 1 0-3.9 5L7 16v3h3v-2h2v-2h1.1A4 4 0 0 0 15 7z" stroke="currentColor" strokeWidth={active ? 1.9 : 1.7} strokeLinejoin="round" /></svg>;
+  const w = active ? 1.9 : 1.7;
+  return (
+    <svg className={cls} viewBox="0 0 24 24" fill="none">
+      <circle cx="8.4" cy="15.6" r="4.2" stroke="currentColor" strokeWidth={w} />
+      <path d="M11.4 12.6 19.6 4.4" stroke="currentColor" strokeWidth={w} strokeLinecap="round" />
+      <path d="m16.1 7.9 1.8 1.8M17.9 6.1l1.8 1.8" stroke="currentColor" strokeWidth={w} strokeLinecap="round" />
+    </svg>
+  );
 }
 function WebhookIcon({ active }: { active?: boolean }) {
   return <svg className={cls} viewBox="0 0 24 24" fill="none"><path d="M9 7a3 3 0 1 1 4 2.8L10 15M7 13a3 3 0 1 0 3 3h6M17 13a3 3 0 1 1-2.8 4" stroke="currentColor" strokeWidth={active ? 1.9 : 1.7} strokeLinecap="round" strokeLinejoin="round" /></svg>;
