@@ -218,16 +218,23 @@ curl "${API_BASE}/api/v1/resume/job/01J3K..." \\
             <Table
               head={["Status", "Meaning"]}
               rows={[
-                ["processing", "Still working. Poll again."],
+                ["processing", "Still working. The only non-terminal status. Poll again."],
                 ["completed", "Done. data and confidence are populated."],
                 ["partial", "Degraded. Some data recovered; check warnings before trusting it."],
                 ["failed", "Could not parse. error explains why."],
               ]}
             />
             <Callout>
-              <b>Results expire.</b> The jobs table carries a TTL, so a <Mono>job_id</Mono> is not a
-              permanent handle and an old one returns <Mono>JOB_NOT_FOUND</Mono>. Store anything you
-              need to keep on your side as soon as you receive it.
+              <b>One request is not a poll loop.</b> A typical parse takes 10-30 seconds, so a single
+              poll straight after submitting will correctly say <Mono>processing</Mono> — that is not
+              a failure and not an end state. Loop until you see a terminal status, and treat any
+              status you do not recognise as non-terminal rather than as an end state.
+            </Callout>
+            <Callout>
+              <b>Results expire after an hour.</b> The jobs table carries a TTL, so a{" "}
+              <Mono>job_id</Mono> is not a permanent handle and an old one returns{" "}
+              <Mono>JOB_NOT_FOUND</Mono> — the document has to be submitted again. Persist the
+              record on your side as soon as you receive it.
             </Callout>
           </Section>
 
@@ -312,13 +319,16 @@ curl -X POST "${API_BASE}/api/v1/resume/parse-uploaded" \\
 
           <Section n="08" id="webhooks" title="Webhooks">
             <P>
-              Register an endpoint and skip polling entirely. Every active endpoint receives every
-              event, and each registration gets its own signing secret.
+              Register an endpoint and skip polling entirely. <Mono>events</Mono> is required and
+              must list at least one event. The response includes <Mono>hmac_secret</Mono>{" "}
+              <b>once</b> — it is never retrievable afterwards and there is no rotate endpoint, so
+              store it before you close the response.
             </P>
             <Code>{`curl -X POST "${API_BASE}/api/v1/webhooks" \\
   -H "X-API-Key: rp_live_your_key" \\
   -H "Content-Type: application/json" \\
-  -d '{"url":"https://your-app.example.com/hooks/capture"}'`}</Code>
+  -d '{"url":"https://your-app.example.com/hooks/capture",
+       "events":["parse.completed","parse.failed"]}'`}</Code>
             <Table
               head={["Event", "Fires when"]}
               rows={[
@@ -327,20 +337,93 @@ curl -X POST "${API_BASE}/api/v1/resume/parse-uploaded" \\
                 ["batch.completed", "Every file in a batch reached a terminal status."],
               ]}
             />
+            <Callout>
+              <b>Register each endpoint once.</b> The secret belongs to the{" "}
+              <b>registration</b>, not to your account. Every active registration receives every
+              event it subscribes to, each signed with <i>its own</i> secret — so if the same URL is
+              registered twice, the secret you saved verifies only one of the two and the other
+              fails every time. List your registrations with <Mono>GET /api/v1/webhooks</Mono> and
+              delete strays with <Mono>DELETE /api/v1/webhooks/&#123;webhook_id&#125;</Mono>.
+            </Callout>
             <H3>Verifying a delivery</H3>
-            <P>Each request carries three headers. Recompute the signature over the raw body:</P>
+            <P>Each request carries three headers:</P>
             <Table
               head={["Header", "Value"]}
               rows={[
-                ["X-Signature", "sha256=<hex> - HMAC-SHA256 of the raw body, keyed with your endpoint secret."],
-                ["X-Timestamp", "Unix timestamp of the delivery."],
+                ["X-Signature", "sha256=<hex> - see the signed message below. Not the body alone."],
+                ["X-Timestamp", "Unix seconds at send time. Part of the signed message."],
                 ["X-Event", "The event name from the table above."],
               ]}
             />
+            <P>
+              The signed message is the timestamp, a literal dot, then the raw body —{" "}
+              <Mono>HMAC_SHA256(secret, X-Timestamp + &quot;.&quot; + raw_body)</Mono>. Two details
+              decide whether this works, and each one on its own causes every delivery to fail:
+            </P>
+            <Table
+              head={["Detail", "Why it matters"]}
+              rows={[
+                ["Include the timestamp prefix", "Signing the body alone never matches. The timestamp is what makes a captured delivery unreplayable."],
+                ["Use the RAW body bytes", "Capture the body before any JSON middleware touches it. Re-serialising a parsed object changes the bytes (separators, key order), so the digest changes even with the correct secret."],
+              ]}
+            />
+            <Code>{`// Node / Express - note express.raw, NOT express.json
+const crypto = require("crypto");
+
+app.post("/hooks/capture",
+  express.raw({ type: "application/json" }),   // req.body stays a Buffer
+  (req, res) => {
+    const ts  = req.get("X-Timestamp");
+    const sig = req.get("X-Signature");
+
+    if (Math.abs(Date.now() / 1000 - Number(ts)) > 300) return res.sendStatus(400);
+
+    const expected = "sha256=" + crypto
+      .createHmac("sha256", process.env.BLUEIQ_WEBHOOK_SECRET)
+      .update(ts + ".")           // <-- the timestamp prefix
+      .update(req.body)           // <-- the RAW bytes
+      .digest("hex");
+
+    const ok = expected.length === sig.length &&
+      crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(sig));
+    if (!ok) return res.sendStatus(401);
+
+    const event = JSON.parse(req.body.toString());   // parse AFTER verifying
+    res.sendStatus(202);                             // ack fast, work async
+  });`}</Code>
+            <Code>{`# Python / FastAPI
+import hashlib, hmac, time
+
+@app.post("/hooks/capture")
+async def capture(request: Request):
+    raw = await request.body()               # raw bytes, before any parsing
+    ts  = request.headers["X-Timestamp"]
+    if abs(time.time() - int(ts)) > 300:
+        raise HTTPException(400, "stale delivery")
+
+    message  = f"{ts}.".encode() + raw
+    expected = "sha256=" + hmac.new(
+        SECRET.encode(), message, hashlib.sha256
+    ).hexdigest()
+    if not hmac.compare_digest(expected, request.headers["X-Signature"]):
+        raise HTTPException(401, "invalid signature")
+
+    event = json.loads(raw)
+    return Response(status_code=202)`}</Code>
             <Callout>
-              <b>A 401 is never retried.</b> If your endpoint rejects a delivery as unauthorised we
-              treat that as a deliberate refusal and drop it. Return 2xx once you have verified the
-              signature; use 5xx if you want the delivery retried.
+              <b>A 4xx is never retried.</b> We treat any non-5xx reply as delivered, so a{" "}
+              <Mono>401</Mono> from a signature mismatch <b>discards that event permanently</b> —
+              nothing is queued for later. Alert on rejections rather than only logging them, and
+              keep a reconcile pass that polls for any <Mono>job_id</Mono> you never got a delivery
+              for. Return <Mono>5xx</Mono> if you do want a retry (≈2s, 5s, 10s).
+            </Callout>
+            <Callout>
+              <b>Deliveries can arrive before your own bookkeeping settles</b>, and the same event
+              can arrive more than once. Persist the <Mono>job_id</Mono> from the submit response
+              first, make the handler idempotent on <Mono>job_id</Mono>, and tolerate an unknown{" "}
+              <Mono>job_id</Mono> (upsert, or buffer and retry the lookup) instead of dropping it.
+              Retries of one event reuse a single timestamp and signature, so the signature is a
+              usable dedupe key.
             </Callout>
           </Section>
 

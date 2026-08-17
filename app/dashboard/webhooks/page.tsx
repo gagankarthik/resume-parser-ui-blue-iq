@@ -12,6 +12,19 @@ function errMsg(e: unknown): string {
   return e instanceof ApiError ? e.message : e instanceof Error ? e.message : "Unexpected error";
 }
 
+/** Trailing slash and case in the host are not meaningful; the rest is. */
+function sameEndpoint(a: string, b: string): boolean {
+  const norm = (u: string) => {
+    try {
+      const p = new URL(u.trim());
+      return `${p.protocol}//${p.host.toLowerCase()}${p.pathname.replace(/\/$/, "")}${p.search}`;
+    } catch {
+      return u.trim().replace(/\/$/, "");
+    }
+  };
+  return norm(a) === norm(b);
+}
+
 export default function WebhooksPage() {
   const [hooks, setHooks] = useState<Webhook[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,9 +57,28 @@ export default function WebhooksPage() {
     setEvents((prev) => (prev.includes(ev) ? prev.filter((x) => x !== ev) : [...prev, ev]));
   }
 
+  // Registering the same URL twice mints a second, independent secret. Both
+  // registrations then receive every event, each signed with its own secret, so the
+  // one you have configured verifies half the deliveries and rejects the rest - and
+  // a rejected delivery is never retried. Warn before it happens rather than leaving
+  // it to be diagnosed from logs weeks later.
+  const duplicate = url.trim() ? hooks.find((h) => sameEndpoint(h.url, url)) : undefined;
+
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!url.trim() || events.length === 0) return;
+    if (
+      duplicate &&
+      !window.confirm(
+        `${duplicate.url} is already registered.\n\n` +
+          "Adding it again creates a SECOND registration with its own signing secret. " +
+          "Both will receive every event, and the secret you already have will only verify " +
+          "one of them - the other's deliveries get rejected and dropped.\n\n" +
+          "Delete the existing registration instead, unless you genuinely want two.",
+      )
+    ) {
+      return;
+    }
     setCreating(true);
     setError("");
     setCreated(null);
@@ -125,6 +157,13 @@ export default function WebhooksPage() {
           <div>
             <Label>Endpoint URL</Label>
             <Input type="url" value={url} placeholder="https://your-server.com/hooks/resume" onChange={(e) => setUrl(e.target.value)} required />
+            {duplicate && (
+              <p className="mt-2 text-sm text-brass-600">
+                Already registered. A second registration gets its own signing secret, and the
+                secret you hold will verify only one of the two - the other endpoint&apos;s
+                deliveries are rejected and dropped. Delete the existing one instead.
+              </p>
+            )}
           </div>
           <div>
             <Label>Events</Label>
