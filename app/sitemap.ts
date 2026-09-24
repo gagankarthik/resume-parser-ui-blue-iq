@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 
+import { SITE_URL } from "@/lib/site";
+
 // Only genuinely public, indexable routes belong here. Everything under
 // /dashboard is authenticated and marked noindex, so listing it would just feed
 // crawlers URLs that redirect to /login.
@@ -10,7 +12,7 @@ const ROUTES: { path: string; priority: number; changeFrequency: MetadataRoute.S
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const base = SITE_URL;
   const lastModified = new Date();
 
   return ROUTES.map(({ path, priority, changeFrequency }) => ({

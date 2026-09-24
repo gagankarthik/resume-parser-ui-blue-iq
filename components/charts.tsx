@@ -40,15 +40,15 @@ export function seriesColor(i: number): string {
 }
 
 function Empty({ label = "No data yet" }: { label?: string }) {
-  return <div className="grid h-32 place-items-center text-sm text-ink-soft/70">{label}</div>;
+  return <div className="grid h-32 place-items-center text-sm text-ink-soft">{label}</div>;
 }
 
 function Frame({ title, aside, children }: { title?: string; aside?: ReactNode; children: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(10,23,51,0.04)]">
+    <div className="glow-soft card-lift rounded-[20px] p-5">
       {(title || aside) && (
         <div className="mb-3 flex items-center justify-between gap-3">
-          {title && <h3 className="font-display text-sm font-semibold tracking-tight text-ink">{title}</h3>}
+          {title && <h3 className="text-[15px] font-semibold text-[#1e293b]">{title}</h3>}
           {aside}
         </div>
       )}
@@ -97,30 +97,27 @@ export function StatCard({
 }: {
   label: string;
   value: ReactNode;
-  sub?: string;
+  sub?: ReactNode;
   accent?: keyof typeof ACCENTS | (string & {});
   color?: string;
   icon?: ReactNode;
 }) {
   const resolved = color ?? ACCENTS[accent] ?? VIZ[0];
   return (
-    <div className="group rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(10,23,51,0.04)] transition-all hover:-translate-y-0.5 hover:border-accent-200 hover:shadow-[0_18px_40px_-30px_rgba(10,23,51,0.4)]">
+    <div className="card-lift relative overflow-hidden rounded-[20px] p-5" style={{ background: `radial-gradient(circle at 50% 0%, color-mix(in oklab, ${resolved} 12%, #f4f8f9) 0%, #f4f8f9 60%)` }}>
       <div className="flex items-center justify-between gap-2">
-        <div className="label-caps flex items-center gap-2 text-ink-soft">
-          <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: resolved }} aria-hidden />
-          {label}
-        </div>
+        <div className="text-[13px] font-medium text-[#475569]">{label}</div>
         {icon && (
           <span
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-xl transition-transform group-hover:scale-105"
-            style={{ background: `color-mix(in oklab, ${resolved} 10%, transparent)`, color: resolved, boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${resolved} 18%, transparent)` }}
+            className="panel-lift grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white"
+            style={{ color: resolved }}
           >
             {icon}
           </span>
         )}
       </div>
-      <div className="mt-3 font-display text-3xl font-semibold tabular-nums tracking-tight text-ink">{value}</div>
-      {sub && <div className="mt-1 text-xs text-ink-soft">{sub}</div>}
+      <div className="mt-4 text-[2rem] font-medium leading-none tabular-nums tracking-[-0.02em] text-[#0f172a]">{value}</div>
+      {sub && <div className="mt-2.5 text-xs text-ink-soft">{sub}</div>}
     </div>
   );
 }
@@ -207,7 +204,7 @@ export function AreaChart({ data, label, color = VIZ[0], format }: { data: Point
               </>
             )}
           </svg>
-          <div className="mt-1 flex justify-between font-mono text-[10px] text-ink-soft/70">
+          <div className="mt-1 flex justify-between font-mono text-[10px] text-ink-soft">
             <span>{data[0]?.date}</span>
             <span>{data[n - 1]?.date}</span>
           </div>
@@ -283,7 +280,7 @@ export function LineChart({ series, label, format }: { series: Series[]; label: 
                 </>
               )}
             </svg>
-            <div className="mt-1 flex justify-between font-mono text-[10px] text-ink-soft/70">
+            <div className="mt-1 flex justify-between font-mono text-[10px] text-ink-soft">
               <span>{axis[0]?.date}</span>
               <span>{axis[axis.length - 1]?.date}</span>
             </div>
@@ -351,7 +348,7 @@ export function BarChart({ data, label, color = VIZ[0], format }: { data: Point[
               </button>
             ))}
           </div>
-          <div className="mt-1 flex justify-between font-mono text-[10px] text-ink-soft/70">
+          <div className="mt-1 flex justify-between font-mono text-[10px] text-ink-soft">
             <span>{data[0]?.date}</span>
             <span>{data[data.length - 1]?.date}</span>
           </div>
@@ -416,23 +413,23 @@ export function Donut({
             </svg>
             <div className="pointer-events-none absolute inset-0 m-auto grid h-20 w-20 place-items-center rounded-full text-center">
               <div>
-                <div className="font-display text-xl font-semibold tabular-nums text-ink">{centerValue.toLocaleString()}</div>
-                <div className="label-caps text-ink-soft/70">{centerLabel}</div>
+                <div className="text-xl font-semibold tabular-nums text-ink">{centerValue.toLocaleString()}</div>
+                <div className="label-caps text-ink-soft">{centerLabel}</div>
               </div>
             </div>
           </div>
-          <ul className="w-full flex-1 space-y-1.5 text-sm">
+          <ul className="w-full min-w-0 flex-1 space-y-1.5 text-sm sm:w-auto">
             {arcs.map((s, i) => (
               <li
                 key={s.label}
                 onMouseEnter={() => setActive(i)}
                 onMouseLeave={() => setActive(null)}
-                className={cnLocal("flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1 transition-colors", active === i && "bg-black/[0.04]")}
+                className={cnLocal("flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1 transition-colors", active === i && "bg-white")}
               >
                 <span className="h-2.5 w-2.5 shrink-0 rounded-sm transition-transform" style={{ background: s.color, transform: active === i ? "scale(1.25)" : undefined }} aria-hidden />
                 <span className="truncate text-ink-soft">{s.label}</span>
                 <span className="ml-auto font-mono font-medium tabular-nums text-ink">{s.value.toLocaleString()}</span>
-                <span className="w-9 shrink-0 text-right font-mono text-xs text-ink-soft/70">{Math.round(s.frac * 100)}%</span>
+                <span className="w-11 shrink-0 text-right font-mono text-xs text-ink-soft">{Math.round(s.frac * 100)}%</span>
               </li>
             ))}
           </ul>
@@ -467,7 +464,7 @@ export function BarList({ title, items, color = VIZ[0] }: { title: string; items
                 <div className="mb-1 flex items-center justify-between gap-2 text-xs">
                   <span className="truncate font-mono text-ink-soft">{i.label}</span>
                   <span className="flex shrink-0 items-center gap-2">
-                    <span className="font-mono text-[11px] text-ink-soft/70 transition-opacity" style={{ opacity: on ? 1 : 0 }}>
+                    <span className="font-mono text-[11px] text-ink-soft transition-opacity" style={{ opacity: on ? 1 : 0 }}>
                       {pct}%
                     </span>
                     <span className="font-mono font-medium tabular-nums text-ink">{i.value.toLocaleString()}</span>

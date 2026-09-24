@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { BackButton } from "@/components/BackButton";
+import { CodeBlock, DocsStrip, DocsToc } from "@/components/docs/DocsNav";
+import { SiteFooter } from "@/components/landing/SiteFooter";
 import {
   Logo,
   TBody,
@@ -13,27 +14,54 @@ import {
   TableWrap,
 } from "@/components/ui";
 import { API_BASE } from "@/lib/config";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
+
+const DOCS_TITLE = "Resume Parsing API Documentation";
+const DOCS_DESCRIPTION =
+  "Blue-IQ Capture API reference: authenticate with an API key, submit a resume, poll the job, and read structured JSON with confidence scores. Webhooks, batches and error codes.";
 
 export const metadata = {
-  title: "API documentation",
-  description:
-    "Blue-IQ Capture API reference: authenticate with an API key, submit a document, poll the job to completion, and read the structured, confidence-scored JSON. Includes webhook delivery and error codes.",
+  title: DOCS_TITLE,
+  description: DOCS_DESCRIPTION,
   keywords: [
-    "Blue-IQ Capture API",
-    "document parsing API",
     "resume parsing API",
-    "structured data extraction",
-    "API documentation",
-    "webhook delivery",
+    "resume parser API documentation",
+    "Blue-IQ Capture API",
+    "webhook signature verification",
+    "API error codes",
   ],
   alternates: { canonical: "/docs" },
   openGraph: {
-    title: "API documentation - Blue-IQ Capture",
-    description:
-      "Authenticate, submit a document, poll for structured JSON. The full Blue-IQ Capture API reference.",
+    title: `${DOCS_TITLE} | ${SITE_NAME}`,
+    description: DOCS_DESCRIPTION,
     url: "/docs",
     type: "article",
   },
+};
+
+// TechArticle for the reference itself, BreadcrumbList so results show
+// "Blue-IQ Capture > API documentation" instead of a bare URL.
+const DOCS_JSON_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      headline: DOCS_TITLE,
+      description: DOCS_DESCRIPTION,
+      url: `${SITE_URL}/docs`,
+      inLanguage: "en-US",
+      proficiencyLevel: "Beginner",
+      publisher: { "@id": `${SITE_URL}/#organization` },
+      isPartOf: { "@id": `${SITE_URL}/#website` },
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: SITE_NAME, item: SITE_URL },
+        { "@type": "ListItem", position: 2, name: "API documentation", item: `${SITE_URL}/docs` },
+      ],
+    },
+  ],
 };
 
 const SECTIONS = [
@@ -72,7 +100,8 @@ const ERRORS: string[][] = [
   ["ACCOUNT_DEACTIVATED", "403", "The workspace is disabled."],
   ["FILE_TOO_LARGE", "413", "Over the 10 MB per-file limit."],
   ["UNSUPPORTED_FILE_TYPE", "415", "Not a PDF, DOCX, RTF, PNG, JPG or TIFF."],
-  ["CORRUPTED_FILE", "422", "The bytes did not match the declared type."],
+  ["SERVICE_UNAVAILABLE", "503", "Storage was briefly unavailable. Request a new upload URL and retry."],
+  ["NOT_A_RESUME", "422", "The file is empty, or it is not a resume. One code for both."],
   ["EMPTY_BATCH", "422", "A batch request with no files."],
   ["BATCH_TOO_LARGE", "413", "Over 200 files or 60 MB in one batch."],
   ["JOB_NOT_FOUND", "404", "Unknown job_id, or the result has expired."],
@@ -87,47 +116,47 @@ const ERRORS: string[][] = [
 
 export default function DocsPage() {
   return (
-    <div className="min-h-screen">
-      <header className="sticky top-0 z-40 border-b border-line bg-paper/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-6">
-          <Link href="/"><Logo className="h-7 w-auto" /></Link>
+    <div className="min-h-dvh bg-surface">
+      {/* Static, server-defined JSON-LD; "<" escaped so "</script>" can never break out. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(DOCS_JSON_LD).replace(/</g, "\\u003c") }}
+      />
+      <header className="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+          <div className="flex min-w-0 items-center gap-3">
+            <Link href="/" aria-label="Blue-IQ Capture home" className="shrink-0">
+              <Logo className="h-[22px] w-auto sm:h-[24px]" />
+            </Link>
+            <span className="hidden h-5 w-px bg-line-strong sm:block" aria-hidden />
+            <span className="hidden text-sm font-semibold text-ink sm:block">API reference</span>
+          </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <Link href="/dashboard" className="rounded-lg px-4 py-2 text-sm font-medium text-ink-soft transition-colors hover:bg-black/[0.04] hover:text-ink">
+            <Link href="/dashboard" className="inline-flex h-10 items-center rounded-lg px-3 text-sm font-semibold text-ink transition-colors hover:bg-accent-50 sm:px-4">
               Dashboard
             </Link>
-            <Link href="/signup" className="rounded-lg bg-accent-700 px-4 py-2 text-sm font-medium text-[var(--surface)] transition-colors hover:bg-accent-800">
-              Get started
+            <Link href="/signup" className="inline-flex h-10 items-center rounded-lg bg-accent-600 px-3 text-sm font-semibold text-white transition-colors hover:bg-accent-700 sm:px-4">
+              Get an API key
             </Link>
+          </div>
+        </div>
+        <div className="border-t border-line lg:hidden">
+          <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
+            <DocsStrip sections={SECTIONS} />
           </div>
         </div>
       </header>
 
-      <div className="mx-auto max-w-6xl px-5 pt-6 sm:px-6">
-        <BackButton />
-      </div>
-
-      <div className="mx-auto flex max-w-6xl gap-12 px-5 pb-10 pt-4 sm:px-6 lg:pb-14">
+      <div className="mx-auto flex max-w-[1200px] gap-14 px-4 pb-20 pt-10 sm:px-6 lg:px-8 lg:pt-14">
         {/* TOC */}
-        <aside className="hidden w-52 shrink-0 lg:block">
-          <nav className="sticky top-24 space-y-1 text-sm">
-            <p className="label-caps mb-3 text-ink-soft">On this page</p>
-            {SECTIONS.map((s, i) => (
-              <a
-                key={s.id}
-                href={`#${s.id}`}
-                className="flex items-center gap-2.5 rounded-md px-3 py-1.5 text-ink-soft transition-colors hover:bg-black/[0.04] hover:text-ink"
-              >
-                <span className="font-mono text-xs text-accent-600/70">{String(i + 1).padStart(2, "0")}</span>
-                {s.label}
-              </a>
-            ))}
-          </nav>
+        <aside className="hidden w-56 shrink-0 lg:block">
+          <DocsToc sections={SECTIONS} />
         </aside>
 
         {/* Content */}
-        <article className="min-w-0 flex-1 space-y-14">
+        <article className="min-w-0 max-w-3xl flex-1 space-y-16">
           <div>
-            <h1 className="font-display text-[2.4rem] font-extrabold leading-[1.1] tracking-[-0.032em] text-ink">
+            <h1 className="text-[2.2rem] font-medium leading-[1.05] tracking-[-0.03em] text-ink sm:text-[2.8rem]">
               Blue-IQ Capture API
             </h1>
             <p className="mt-4 max-w-2xl text-[17px] leading-relaxed text-ink-soft">
@@ -221,7 +250,7 @@ curl "${API_BASE}/api/v1/resume/job/01J3K..." \\
                 ["processing", "Still working. The only non-terminal status. Poll again."],
                 ["completed", "Done. data and confidence are populated."],
                 ["partial", "Degraded. Some data recovered; check warnings before trusting it."],
-                ["failed", "Could not parse. error explains why."],
+                ["failed", "Could not parse. error explains why; error_code is the reason to branch on (NOT_A_RESUME: the file was empty or not a resume)."],
               ]}
             />
             <Callout>
@@ -285,6 +314,13 @@ curl "${API_BASE}/api/v1/resume/job/01J3K..." \\
                 ["warnings", "Human-readable caveats, e.g. a duty list that looks short."],
               ]}
             />
+            <P>
+              The record is cleaned before it is returned. An entry the resume repeats (a role,
+              degree, certification, license, skill or bullet) appears once, keeping every value
+              either copy held; entries that differ on dates or a license number stay separate.
+              Clear typos are corrected, but names, employers, schools, places, emails, URLs and
+              license numbers are never changed.
+            </P>
           </Section>
 
           <Section n="06" id="large" title="Large files">
@@ -333,7 +369,7 @@ curl -X POST "${API_BASE}/api/v1/resume/parse-uploaded" \\
               head={["Event", "Fires when"]}
               rows={[
                 ["parse.completed", "A single parse finished successfully."],
-                ["parse.failed", "A single parse failed."],
+                ["parse.failed", "A single parse failed. Carries error and error_code (e.g. NOT_A_RESUME)."],
                 ["batch.completed", "Every file in a batch reached a terminal status."],
               ]}
             />
@@ -443,15 +479,27 @@ async def capture(request: Request):
           <Section n="10" id="errors" title="Errors">
             <P>
               Every error returns the same shape, with a stable machine-readable{" "}
-              <Mono>code</Mono>. Branch on the code, not the message.
+              <Mono>error_code</Mono>. Branch on the code, not the message; <Mono>hint</Mono> is
+              safe to show to end users.
             </P>
             <Code>{`{
   "error": {
-    "code": "UNSUPPORTED_FILE_TYPE",
-    "detail": "Only PDF, DOCX, RTF, PNG, JPG and TIFF are accepted."
+    "status_code": 415,
+    "error_code": "UNSUPPORTED_FILE_TYPE",
+    "detail": "Unsupported file extension '.txt'.",
+    "hint": "This file type is not supported...",
+    "request_id": "a1b2c3d4-..."
   }
 }`}</Code>
             <Table head={["Code", "HTTP", "Meaning"]} rows={ERRORS} />
+            <Callout>
+              <b>Wrong document? One code.</b> <Mono>NOT_A_RESUME</Mono> covers both an empty file
+              and a file that is not a resume (a job description, cover letter, invoice...). A
+              0-byte upload gets it straight back from the submit as <Mono>422</Mono>. Anything else
+              is checked after its text is read, so it arrives as a <Mono>failed</Mono> job whose
+              poll response and <Mono>parse.failed</Mono> webhook carry{" "}
+              <Mono>error_code: &quot;NOT_A_RESUME&quot;</Mono>. Retrying the same file will not help.
+            </Callout>
           </Section>
 
           <Section n="11" id="limits" title="Limits">
@@ -472,6 +520,7 @@ async def capture(request: Request):
           </Section>
         </article>
       </div>
+      <SiteFooter />
     </div>
   );
 }
@@ -480,51 +529,53 @@ async def capture(request: Request):
 
 function BaseUrl() {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
-      <span className="label-caps shrink-0 text-ink-soft">Base URL</span>
-      <code className="overflow-x-auto font-mono text-sm text-ink">{API_BASE}</code>
+    <div className="flex flex-col gap-1 panel-lift rounded-xl bg-white px-4 py-3 sm:flex-row sm:items-center sm:gap-4">
+      <span className="shrink-0 text-xs font-semibold text-ink-soft">Base URL</span>
+      <code className="scroll-fine overflow-x-auto whitespace-nowrap font-mono text-sm font-medium text-ink">{API_BASE}</code>
     </div>
   );
 }
 
 function Section({ n, id, title, children }: { n: string; id: string; title: string; children: ReactNode }) {
   return (
-    <section className="scroll-mt-24">
-      <div className="flex items-baseline gap-3">
-        <span className="font-display text-lg font-semibold italic text-accent-700/80">{n}</span>
-        <h2 id={id} className="scroll-mt-24 font-display text-2xl font-semibold tracking-tight text-ink">{title}</h2>
+    <section className="scroll-mt-32 lg:scroll-mt-24">
+      <div className="flex items-baseline gap-3 border-b border-line pb-3">
+        <span className="font-mono text-sm font-semibold text-accent-700">{n}</span>
+        <h2 id={id} className="scroll-mt-32 text-[1.6rem] font-medium tracking-[-0.02em] text-ink lg:scroll-mt-24">{title}</h2>
       </div>
-      <hr className="rule mt-3 mb-5" />
+      <div className="mt-5" />
       <div className="space-y-4">{children}</div>
     </section>
   );
 }
 
 function H3({ children }: { children: ReactNode }) {
-  return <h3 className="label-caps mt-6 text-ink-soft">{children}</h3>;
+  return <h3 className="pt-4 text-lg font-semibold text-[#1e293b]">{children}</h3>;
 }
 
 function P({ children }: { children: ReactNode }) {
-  return <p className="text-[15px] leading-relaxed text-ink-soft">{children}</p>;
+  return <p className="text-[15.5px] leading-[1.7] text-[#35415c]">{children}</p>;
 }
 
 function Callout({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-xl border border-accent-200 bg-accent-50/60 px-4 py-3 text-[15px] leading-relaxed text-ink-soft">
-      {children}
+    <div className="flex gap-3 rounded-xl border border-[#f1d58a] bg-mark-soft px-4 py-3.5 text-[15px] leading-relaxed text-[#35415c] [&_b]:text-ink">
+      <svg viewBox="0 0 20 20" className="mt-[3px] h-4 w-4 shrink-0 text-brass-600" fill="none" aria-hidden>
+        <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.6" />
+        <path d="M10 6v5M10 13.8v.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+      <div>{children}</div>
     </div>
   );
 }
 
 function Mono({ children }: { children: ReactNode }) {
-  return <code className="rounded-md bg-accent-50 px-1.5 py-0.5 font-mono text-[0.85em] text-accent-800 ring-1 ring-inset ring-accent-100">{children}</code>;
+  return <code className="rounded-md bg-paper px-1.5 py-0.5 font-mono text-[0.85em] text-accent-800 ring-1 ring-inset ring-line">{children}</code>;
 }
 
 function Code({ children }: { children: string }) {
   return (
-    <pre className="overflow-x-auto rounded-xl border border-line bg-[#0b1220] p-4 font-mono text-[13px] leading-relaxed text-[#dbe4f5]">
-      <code>{children}</code>
-    </pre>
+    <CodeBlock>{children}</CodeBlock>
   );
 }
 
@@ -545,7 +596,7 @@ function Table({ head, rows }: { head: string[]; rows: string[][] }) {
           {rows.map((r, i) => (
             <TR key={i}>
               {r.map((c, j) => (
-                <TD key={j} className={j === 0 ? "font-mono text-xs" : "text-ink-soft"}>
+                <TD key={j} className={j === 0 ? "whitespace-nowrap font-mono text-xs font-medium" : "text-ink-soft"}>
                   {c}
                 </TD>
               ))}

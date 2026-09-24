@@ -65,7 +65,7 @@ export function ApiStatus() {
   const deps = Object.entries(health.dependencies ?? {});
 
   return (
-    <div className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded-2xl border border-line bg-surface px-5 py-4">
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-3 glow-soft card-lift rounded-[20px] px-5 py-4">
       <span className="inline-flex items-center gap-2.5">
         <span className="relative flex h-2.5 w-2.5">
           {state === "up" && (
@@ -93,7 +93,7 @@ export function ApiStatus() {
                 aria-hidden
               />
               <span className="font-mono">{name}</span>
-              <span className="text-ink-soft/60">{value}</span>
+              <span className="text-ink-soft">{value}</span>
             </span>
           ))}
         </span>
@@ -105,7 +105,7 @@ export function ApiStatus() {
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <span className="inline-flex items-baseline gap-1.5 text-xs">
-      <span className="text-ink-soft/70">{label}</span>
+      <span className="text-ink-soft">{label}</span>
       <span className="font-mono font-medium text-ink">{value}</span>
     </span>
   );

@@ -117,7 +117,7 @@ export default function SignupPage() {
                   setError(err instanceof Error ? err.message : "Could not resend code");
                 }
               }}
-              className="mt-4 text-sm text-accent-700 hover:underline"
+              className="mt-4 text-sm font-semibold text-accent-700 underline-offset-4 hover:underline"
             >
               Resend code
             </button>
@@ -125,7 +125,7 @@ export default function SignupPage() {
         )}
         <p className="mt-4 text-center text-sm text-ink-soft">
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-accent-700 hover:underline">
+          <Link href="/login" className="font-semibold text-accent-700 underline-offset-4 hover:underline">
             Sign in
           </Link>
         </p>

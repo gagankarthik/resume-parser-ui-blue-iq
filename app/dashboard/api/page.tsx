@@ -17,16 +17,14 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { ApiStatus } from "@/components/dashboard/ApiStatus";
+import { CopyButton, SearchField, Toolbar } from "@/components/dashboard/kit";
 import { StatCard } from "@/components/charts";
 import { AlertIcon, ClockIcon, JobsIcon, TokenIcon } from "@/components/icons";
 import {
-  Badge,
   Button,
   EmptyState,
   ErrorBanner,
-  Input,
   PageHeader,
-  Select,
   Skeleton,
   TBody,
   TD,
@@ -35,6 +33,7 @@ import {
   TR,
   Table,
   TableScroll,
+  Tabs,
 } from "@/components/ui";
 import { getUsage } from "@/lib/account";
 import { API_BASE } from "@/lib/config";
@@ -70,10 +69,11 @@ const ENDPOINTS: Endpoint[] = [
 
 const GROUPS: (Group | "All")[] = ["All", "Parsing", "Jobs", "Batch", "Webhooks", "Service"];
 
-const METHOD_TONE: Record<Method, "info" | "success" | "danger"> = {
-  GET: "info",
-  POST: "success",
-  DELETE: "danger",
+/** Method chips: colour plus the verb itself, so it never relies on colour. */
+const METHOD_STYLE: Record<Method, string> = {
+  GET: "bg-accent-50 text-accent-800 ring-accent-200",
+  POST: "bg-emerald-50 text-emerald-800 ring-emerald-200",
+  DELETE: "bg-red-50 text-red-800 ring-red-200",
 };
 
 function errMsg(e: unknown): string {
@@ -123,11 +123,15 @@ export default function ApiEndpointsPage() {
         title="API endpoints"
         description={`${ENDPOINTS.length} endpoints on ${API_BASE}`}
         actions={
-          <Select value={days} onChange={(e) => setDays(Number(e.target.value))} aria-label="Time window">
-            <option value={7}>Last 7 days</option>
-            <option value={30}>Last 30 days</option>
-            <option value={90}>Last 90 days</option>
-          </Select>
+          <Tabs<"7" | "30" | "90">
+            value={String(days) as "7" | "30" | "90"}
+            onChange={(v) => setDays(Number(v))}
+            options={[
+              { id: "7", label: "7 days" },
+              { id: "30", label: "30 days" },
+              { id: "90", label: "90 days" },
+            ]}
+          />
         }
       />
 
@@ -157,41 +161,41 @@ export default function ApiEndpointsPage() {
       )}
 
       {/* Filters */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-3 sm:flex-row sm:items-center">
-        <div className="flex flex-wrap gap-1.5">
-          {GROUPS.map((g) => (
-            <button
-              key={g}
-              type="button"
-              onClick={() => setGroup(g)}
-              aria-pressed={group === g}
-              className={
-                "rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors " +
-                (group === g
-                  ? "bg-accent-700 text-white"
-                  : "text-ink-soft hover:bg-black/[0.04] hover:text-ink")
-              }
-            >
-              {g}
-            </button>
-          ))}
-        </div>
-        <div className="sm:ml-auto sm:w-72">
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by path or name..."
-            aria-label="Search endpoints"
-          />
-        </div>
-      </div>
+      <Toolbar>
+        <Tabs<Group | "All">
+          value={group}
+          onChange={setGroup}
+          options={GROUPS.map((g) => ({
+            id: g,
+            label: g,
+            badge: g === "All" ? ENDPOINTS.length : ENDPOINTS.filter((e) => e.group === g).length,
+          }))}
+        />
+        <SearchField value={query} onChange={setQuery} placeholder="Search by path or name" label="Search endpoints" className="sm:ml-auto" />
+      </Toolbar>
 
       {/* Catalog */}
-      <div className="rounded-2xl border border-line bg-surface">
+      <div className="glow-soft card-lift rounded-[20px] p-3 sm:p-4">
         {visible.length === 0 ? (
-          <EmptyState title="No endpoints match" hint="Clear the filter or search for a different path." />
+          <EmptyState
+            art={null}
+            title="No endpoints match"
+            hint="Try a different path, or show every group."
+            action={
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  setGroup("All");
+                }}
+              >
+                Clear filters
+              </Button>
+            }
+          />
         ) : (
-          <TableScroll className="mx-0 max-w-full px-0">
+          <TableScroll>
             <Table className="min-w-[52rem]">
               <THead>
                 <TR>
@@ -207,19 +211,28 @@ export default function ApiEndpointsPage() {
                 {visible.map((e) => (
                   <TR key={`${e.method} ${e.path}`}>
                     <TD>
-                      <Badge tone={METHOD_TONE[e.method]}>{e.method}</Badge>
+                      <span className={"inline-flex w-[4.25rem] justify-center rounded-md py-0.5 font-mono text-[11.5px] font-semibold ring-1 ring-inset " + METHOD_STYLE[e.method]}>
+                        {e.method}
+                      </span>
                     </TD>
                     <TD>
-                      <span className="font-mono text-[12.5px] text-ink">{e.path}</span>
+                      <span className="flex items-center gap-1">
+                        <span className="font-mono text-[12.5px] text-ink">{e.path}</span>
+                        <CopyButton text={`${API_BASE}${e.path}`} label="Copy full URL" compact />
+                      </span>
+                      <span className="block text-[13px] font-medium text-[#1e293b]">{e.name}</span>
                       <span className="mt-0.5 block text-xs text-ink-soft">{e.notes}</span>
                     </TD>
                     <TD className="text-ink-soft">{e.group}</TD>
                     <TD className="font-mono text-xs text-ink-soft">{e.auth}</TD>
                     <TD className="text-ink-soft">
-                      {e.auth === "Public" ? "-" : <span className="text-ink-soft/70">Not enforced</span>}
+                      {e.auth === "Public" ? "-" : <span className="text-ink-soft">Not enforced</span>}
                     </TD>
                     <TD>
-                      <Badge tone="success">Live</Badge>
+                      <span className="inline-flex items-center gap-1.5 text-sm">
+                        <span className="h-2 w-2 rounded-full bg-emerald-600" aria-hidden />
+                        Live
+                      </span>
                     </TD>
                   </TR>
                 ))}
@@ -230,8 +243,8 @@ export default function ApiEndpointsPage() {
       </div>
 
       {/* Say plainly what is not measured, rather than showing a plausible number. */}
-      <div className="rounded-2xl border border-dashed border-line-strong bg-paper p-5">
-        <h2 className="text-sm font-semibold text-ink">Per-endpoint metrics are not instrumented yet</h2>
+      <div className="glow-soft card-lift rounded-[20px] p-5 sm:p-6">
+        <h2 className="text-[15px] font-semibold text-[#1e293b]">Per-endpoint metrics are not instrumented yet</h2>
         <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-ink-soft">
           Requests, latency and error rate above are workspace-wide. They are not broken down per
           endpoint because the audit log records parse jobs - job id, duration, status, tokens - and

@@ -143,23 +143,23 @@ export default function CompanyDetailClient({ companyId }: { companyId: string }
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">{c.name || c.company_id}</h1>
+                <h1 className="text-[1.9rem] font-medium leading-tight tracking-[-0.02em] text-ink sm:text-[2.1rem]">{c.name || c.company_id}</h1>
                 <Badge tone={disabled ? "danger" : "success"}>{disabled ? "Disabled" : "Active"}</Badge>
                 <Badge tone="neutral">{c.plan || "free"}</Badge>
               </div>
               <div className="mt-2 space-y-0.5 text-sm text-ink-soft">
                 <div>{c.email || "-"}</div>
-                <div className="font-mono text-xs text-ink-soft/70">
+                <div className="font-mono text-xs text-ink-soft">
                   {c.company_id}{c.created_at ? ` - joined ${c.created_at.slice(0, 10)}` : ""}
                 </div>
               </div>
             </div>
-            <div className="flex gap-1 rounded-lg border border-line p-1">
+            <div className="flex gap-0.5 rounded-lg bg-paper p-1 ring-1 ring-inset ring-line">
               {[7, 30, 90].map((d) => (
                 <button
                   key={d}
                   onClick={() => setDays(d)}
-                  className={"rounded-md px-3 py-1 text-sm font-medium transition-colors " + (d === days ? "bg-accent-700 text-[var(--surface)]" : "text-ink-soft hover:bg-black/[0.04]")}
+                  className={"rounded-md px-3 py-1 text-sm font-medium transition-colors " + (d === days ? "bg-surface text-ink shadow-[0_1px_2px_rgba(12,26,58,0.12)] ring-1 ring-line" : "text-ink-soft hover:text-ink")}
                 >
                   {d}d
                 </button>
@@ -170,15 +170,15 @@ export default function CompanyDetailClient({ companyId }: { companyId: string }
           {notice && <div className="rounded-xl border border-accent-200 bg-accent-50 px-4 py-2.5 text-sm text-accent-800">{notice}</div>}
 
           {/* Admin controls */}
-          <div className="rounded-2xl border border-line bg-surface p-5">
-            <h3 className="mb-4 font-display text-sm font-semibold tracking-tight text-ink">Account controls</h3>
+          <div className="glow-soft card-lift rounded-[20px] p-5">
+            <h3 className="mb-4 text-sm font-semibold tracking-tight text-ink">Account controls</h3>
             <div className="flex flex-wrap items-end gap-4">
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-ink-soft">Plan</label>
                 <select
                   value={plan}
                   onChange={(e) => setPlan(e.target.value)}
-                  className="h-10 rounded-lg border border-line-strong bg-surface px-3 text-sm text-ink outline-none focus:border-accent-500"
+                  className="h-10 rounded-[10px] border border-line-strong bg-white px-3 text-sm text-ink outline-none focus:border-accent-500"
                 >
                   {planOptions.map((p) => (
                     <option key={p} value={p}>{p}</option>
@@ -317,9 +317,9 @@ export default function CompanyDetailClient({ companyId }: { companyId: string }
 
 function Panel({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-line bg-surface">
+    <div className="overflow-hidden glow-soft card-lift rounded-[20px]">
       <div className="border-b border-line px-5 py-3.5">
-        <h3 className="font-display text-sm font-semibold tracking-tight text-ink">{title}</h3>
+        <h3 className="text-sm font-semibold tracking-tight text-ink">{title}</h3>
         {subtitle && <p className="mt-0.5 text-xs text-ink-soft">{subtitle}</p>}
       </div>
       {children}
@@ -328,5 +328,5 @@ function Panel({ title, subtitle, children }: { title: string; subtitle?: string
 }
 
 function EmptyRow({ text }: { text: string }) {
-  return <div className="grid h-20 place-items-center text-sm text-ink-soft/70">{text}</div>;
+  return <div className="grid h-20 place-items-center text-sm text-ink-soft">{text}</div>;
 }

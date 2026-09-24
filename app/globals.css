@@ -3,37 +3,50 @@
 /* -----------------------------------------------------------------------------
    Blue-IQ design tokens.
 
-   The product platform and the UAT console are independent apps that are meant
-   to LOOK like one product. These token values (palette, type roles, motion) are
-   intentionally identical in both repos - if you change one, change the other to
-   match. See docs/PLATFORM.md in the parser repo for the design reference.
+   Every colour here descends from the logo (public/logo.svg): the logogram blue
+   #297AFF and its cyan #34C2FF. The logo blue is too light to carry white text
+   (3.9:1), so interactive fills and links use the deeper --color-accent-600
+   (#1A5FE6, 5.5:1 on white); the logo value itself lives at accent-500 and is
+   used for illustration and focus, never for small text.
 
-   Palette: Blue-IQ deep blue (#002181) on a cool-white enterprise canvas.
+   The visual system is the "glow card" from the landing page's feature row:
+   20px cards whose colour falls from the top edge onto a pale floor, white
+   panels floating inside them, and black-outlined pills. The .glow-* classes
+   below are the only place those gradients are defined; use them rather than
+   inlining a gradient on a component.
+
+   The UAT console used to mirror these values. If it still exists, bring it
+   across to this palette so the two keep reading as one product.
    ----------------------------------------------------------------------------- */
 
 /* Rebind the dark variant to a class we never apply, so OS dark-mode can't
-   half-apply stray `dark:` utilities left in either codebase. */
+   half-apply stray `dark:` utilities. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --paper: #f7f9fc;        /* crisp cool near-white enterprise canvas */
-  --surface: #ffffff;      /* raised cards/sheets */
-  --ink: #0e1626;          /* deep cool navy-ink, high contrast */
-  --ink-soft: #4a5568;     /* cool slate for secondary text */
-  --line: #e6e9f1;         /* cool hairlines */
-  --line-strong: #ced5e2;
-  /* Landing-page canvas: a touch cooler and deeper than --paper, so the hero
-     reads as a distinct surface the media block can blend into. */
-  --canvas: #edeef5;
+  --paper: #f4f8f9;        /* the glow cards' floor; subtle fills */
+  --surface: #ffffff;      /* page background and floating panels */
+  --ink: #0f172a;          /* headings and body */
+  --ink-soft: #475569;     /* secondary text: 7.6:1 on white, 7.1:1 on the card floor */
+  --control: #748399;      /* input/control borders: 3.2:1 on the dashboard canvas, 3.9:1 on white (WCAG 1.4.11) */
+  --dash: #e6ecf4;         /* dashboard canvas: cards sit lighter on it. ink-soft is 6.4:1 here */
+  --line: #e5eaf0;         /* hairlines */
+  --line-strong: #cbd5e1;
+  --canvas: #ffffff;
+  --night: #0a1633;        /* the one dark surface: code, rail, auth panel */
+  --night-line: #1d2c52;
+  --mark: #ffd25e;         /* the reviewer's highlighter */
+  --mark-soft: #fff4d1;
+  --mark-ink: #7a4e00;
   --background: var(--paper);
   --foreground: var(--ink);
 
-  /* Legacy token bridge - the UAT console still references these names. */
+  /* Legacy token bridge - older call sites still reference these names. */
   --bg: var(--paper);
   --bg-elev: var(--surface);
   --fg: var(--ink);
   --muted: var(--ink-soft);
-  --accent: #002181;
+  --accent: #1a5fe6;
 }
 
 @theme inline {
@@ -45,47 +58,56 @@
   --color-ink-soft: var(--ink-soft);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
+  --color-control: var(--control);
+  --color-dash: var(--dash);
+  --color-canvas: var(--canvas);
+  --color-night: var(--night);
+  --color-night-line: var(--night-line);
+  --color-mark: var(--mark);
+  --color-mark-soft: var(--mark-soft);
+  --color-mark-ink: var(--mark-ink);
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
-  --font-display: var(--font-display);
+  --font-display: var(--font-sans);
 
-  /* Primary: Blue-IQ deep blue (#002181) with a brighter cobalt mid. */
-  --color-accent-50: #eef2fe;
-  --color-accent-100: #dde5fc;
-  --color-accent-200: #bfccf8;
-  --color-accent-300: #93a7f0;
-  --color-accent-400: #5f7ce6;
-  --color-accent-500: #2c49d6;
-  --color-accent-600: #123aa8;
-  --color-accent-700: #002181;
-  --color-accent-800: #001a66;
-  --color-accent-900: #001452;
+  /* Brand blue, built around the logo's #297AFF (500). */
+  --color-accent-50: #eef4ff;
+  --color-accent-100: #dce8ff;
+  --color-accent-200: #b8d0ff;
+  --color-accent-300: #86afff;
+  --color-accent-400: #5592ff;
+  --color-accent-500: #297aff;
+  --color-accent-600: #1a5fe6;
+  --color-accent-700: #1449c4;
+  --color-accent-800: #0f3899;
+  --color-accent-900: #0b2a73;
 
-  /* Secondary: warm amber for sparing highlights (low-confidence, flags). */
-  --color-brass-400: #c9920c;
-  --color-brass-500: #b07a08;
+  /* The logo's cyan, for illustration only. */
+  --color-cyan-brand: #34c2ff;
+
+  /* Review amber (low-confidence, flags). */
+  --color-brass-400: #e0a516;
+  --color-brass-500: #b7820a;
   --color-brass-600: #8a5f06;
 }
 
 /* -- Data-visualisation palette -----------------------------------------------
    Categorical hues in FIXED order - series 1 is always --viz-1. Never cycled and
    never reassigned by rank, so a filter that drops a series doesn't repaint the
-   survivors. Validated on the #ffffff chart surface with the dataviz six checks
-   (lightness band, chroma floor, CVD separation, normal-vision floor, contrast):
-   all pass, worst adjacent pair delta E 19.1 (protan). Re-run the validator before
-   changing ANY value here.
+   survivors. Series 1 is the brand blue (same lightness band as the cobalt it
+   replaced); re-run the dataviz validator before changing any other value.
 
-   A 9th series is never a generated hue - fold it into "Other" or facet. */
+   A 7th series is never a generated hue - fold it into "Other" or facet. */
 :root {
-  --viz-1: #2c49d6;   /* brand cobalt */
-  --viz-2: #b07a08;   /* brass */
+  --viz-1: #1a5fe6;   /* brand blue */
+  --viz-2: #b07a08;   /* amber */
   --viz-3: #0891b2;   /* cyan */
   --viz-4: #b91c1c;   /* red */
   --viz-5: #6d28d9;   /* violet */
   --viz-6: #15803d;   /* green */
 
-  /* Reserved status colors - state, never "series 7". Always shipped with a
+  /* Reserved status colours - state, never "series 7". Always shipped with a
      label or icon so state is never carried by colour alone. */
   --viz-good: #15803d;
   --viz-warning: #b07a08;
@@ -93,22 +115,20 @@
   --viz-critical: #b91c1c;
 
   /* Sequential ramp (magnitude): one hue, light -> dark. */
-  --viz-seq-1: #dde5fc;
-  --viz-seq-2: #93a7f0;
-  --viz-seq-3: #2c49d6;
-  --viz-seq-4: #123aa8;
-  --viz-seq-5: #002181;
+  --viz-seq-1: #dce8ff;
+  --viz-seq-2: #86afff;
+  --viz-seq-3: #297aff;
+  --viz-seq-4: #1449c4;
+  --viz-seq-5: #0b2a73;
 
-  /* Recessive chart furniture. */
   --viz-grid: var(--line);
   --viz-axis: var(--ink-soft);
 }
 
 body {
-  background: var(--paper);
+  background: var(--surface);
   color: var(--ink);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  font-feature-settings: "ss01", "cv01";
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -117,9 +137,8 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Display headings: modern grotesque with optical sizing where supported. */
 .font-display {
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-optical-sizing: auto;
 }
 
@@ -128,170 +147,107 @@ html {
   color: var(--color-accent-900);
 }
 
-/* Accent focus ring for inputs/controls. */
-/* Links and buttons have no focus style of their own, so they get the ring.
-   Inputs, textareas and selects are excluded on purpose: they already show
-   focus through their own border + soft ring, and stacking a hard 2px outline
-   on top of that is the doubled blue halo it used to draw. */
-:where(a, button):focus-visible {
+/* Links and buttons get the ring. Inputs are excluded on purpose: they show
+   focus through their own border + soft ring, and stacking both doubles it. */
+:where(a, button, [role="slider"], summary):focus-visible {
   outline: 2px solid var(--color-accent-500);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 6px;
+}
+:where(input[type="range"]):focus-visible {
+  outline: 2px solid var(--color-accent-500);
+  outline-offset: 4px;
 }
 
-/* -- Small-caps editorial label ----------------------------------------------- */
+/* Small field label. Sentence case on purpose: this used to be tracked-out
+   capitals, which shouted on every table header and card. */
 .label-caps {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  letter-spacing: 0.005em;
 }
 
-/* -- Hairline ruled divider --------------------------------------------------- */
 .rule {
   border: 0;
   border-top: 1px solid var(--line);
 }
 
-/* Enterprise theme uses solid fills only - no decorative gradients. */
-.text-gradient {
-  color: var(--color-accent-600);
-}
+/* -- Glow cards -------------------------------------------------------------
+   Colour falls from the top-centre of the card onto the neutral floor. The
+   warm set is the feature row's own; --brand is the logo blue and cyan. */
+.glow-amber { background: radial-gradient(circle at 50% 0%, #ffb347 0%, #f9ed96 30%, #f4f8f9 60%, #f4f8f9 100%); }
+.glow-pink  { background: radial-gradient(circle at 50% 0%, #e5a1f5 0%, #f8aca0 30%, #f4f8f9 60%, #f4f8f9 100%); }
+.glow-lilac { background: radial-gradient(circle at 50% 0%, #f9ed96 0%, #e5a1f5 30%, #f4f8f9 60%, #f4f8f9 100%); }
+.glow-lime  { background: radial-gradient(circle at 50% 0%, #f9ed96 0%, #e2ebc9 32%, #f4f8f9 62%, #f4f8f9 100%); }
+.glow-peach { background: radial-gradient(circle at 50% 0%, #f8aca0 0%, #fdeadb 32%, #f4f8f9 62%, #f4f8f9 100%); }
+.glow-sky   { background: radial-gradient(circle at 50% 0%, #a9d3e8 0%, #cedce4 32%, #f4f8f9 62%, #f4f8f9 100%); }
+.glow-brand { background: radial-gradient(circle at 50% 0%, #7fb2ff 0%, #c6e8ff 32%, #f4f8f9 62%, #f4f8f9 100%); }
+/* Quiet variant for working surfaces (forms, tables): the same shape, a
+   fraction of the colour, so a dense page does not glow all over. */
+.glow-soft  { background: radial-gradient(120% 70% at 50% 0%, #eef4ff 0%, #f7fafc 55%, #f7fafc 100%); }
+.glow-none  { background: #f4f8f9; }
 
-/* -- Structural background: hairline grid, masked to fade out ------------------ */
-.bg-grid {
-  background-image:
-    linear-gradient(to right, var(--line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--line) 1px, transparent 1px);
-  background-size: 58px 58px;
-  -webkit-mask-image: radial-gradient(ellipse 78% 56% at 50% 0%, #000 34%, transparent 72%);
-  mask-image: radial-gradient(ellipse 78% 56% at 50% 0%, #000 34%, transparent 72%);
-}
+.card-lift { box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1); }
+.panel-lift { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04); }
+.pill-lift { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); }
 
-/* -- Faint canvas texture for depth (UAT console shell) ----------------------- */
-.paper-grain::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.35;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-}
-.paper-grain > * {
-  position: relative;
-  z-index: 1;
+/* Reviewer's highlighter: a slightly irregular marker stroke behind text. */
+.mark {
+  background-image: linear-gradient(100deg, transparent 0.2em, var(--mark) 0.2em, var(--mark) calc(100% - 0.15em), transparent calc(100% - 0.15em));
+  background-size: 100% 0.62em;
+  background-position: 0 88%;
+  background-repeat: no-repeat;
+  padding: 0 0.08em;
 }
 
 /* -- Keyframes ---------------------------------------------------------------- */
-@keyframes fade-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: none; }
-}
 @keyframes menu-in {
-  from { opacity: 0; transform: translateY(6px) scale(0.99); }
+  from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: none; }
 }
-@keyframes word-in {
-  from { opacity: 0; transform: translateY(0.55em); }
-  to { opacity: 1; transform: none; }
+@keyframes drawer-in {
+  from { transform: translateX(-100%); }
+  to { transform: none; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 @keyframes grow-x {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
 }
-@keyframes flow-up {
-  0% { top: 100%; opacity: 0; }
-  14% { opacity: 1; }
-  86% { opacity: 1; }
-  100% { top: 0%; opacity: 0; }
+
+/* Hero lights (components/landing/HeroCanvas.tsx): a slow drift, transform
+   only, so the glow behind the streams is never quite still. */
+@keyframes hero-orb {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33% { transform: translate3d(-6%, 5%, 0) scale(1.08); }
+  66% { transform: translate3d(4%, -4%, 0) scale(0.95); }
 }
-@keyframes pop-in {
-  0% { opacity: 0; transform: translateY(8px) scale(0.98); }
-  100% { opacity: 1; transform: none; }
-}
-@keyframes float-y {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-@keyframes scan {
-  0% { top: 6%; opacity: 0; }
-  15% { opacity: 1; }
-  85% { opacity: 1; }
-  100% { top: 90%; opacity: 0; }
-}
-@keyframes shimmer-sweep {
-  100% { transform: translateX(100%); }
+.hero-orb {
+  animation-name: hero-orb;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  will-change: transform;
 }
 
-/* -- Animation utilities ------------------------------------------------------ */
-.animate-fade-up { animation: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
 .animate-menu { animation: menu-in 0.16s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
-.animate-word { animation: word-in 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
-.pop-in { animation: pop-in 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
-.animate-float { animation: float-y 3.5s ease-in-out infinite; }
-.animate-scan { animation: scan 1.7s ease-in-out infinite; }
-.flow-dot { animation: flow-up 3.6s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
+.animate-drawer { animation: drawer-in 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.animate-fade { animation: fade-in 0.2s ease-out both; }
 
-/* One-shot entrance (UAT console). Distinct from `.reveal`, which is the
-   scroll-triggered variant toggled by the product site's <Reveal> component. */
-.animate-reveal { animation: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
-
-/* Confidence-bar fill: a functional first-paint animation tied to the score it
-   represents, not decoration. */
+/* Confidence-bar fill: a functional first-paint animation tied to the score. */
 .grow-x {
   transform-origin: left;
-  animation: grow-x 1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: grow-x 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
-.animate-shimmer::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--color-accent-500) 22%, transparent), transparent);
-  animation: shimmer-sweep 1.5s infinite;
-}
-
-/* Animated accent ring for the active dropzone. */
-@property --angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-@keyframes spin-ring {
-  to { --angle: 360deg; }
-}
-.ring-glow::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background: conic-gradient(from var(--angle, 0deg), var(--color-accent-500), var(--color-accent-300), var(--color-accent-600), var(--color-accent-500));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  animation: spin-ring 4s linear infinite;
-}
-
-/* -- Scroll-reveal (toggled by the <Reveal> client component) ------------------ */
-.reveal {
-  opacity: 0;
-  transform: translateY(22px);
-  transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
-  will-change: opacity, transform;
-}
-.reveal.in {
-  opacity: 1;
-  transform: none;
-}
-
-/* -- Refined scrollbar for JSON / long lists ---------------------------------- */
+/* -- Fine scrollbar for code / long lists ------------------------------------- */
 .scroll-fine::-webkit-scrollbar { width: 10px; height: 10px; }
 .scroll-fine::-webkit-scrollbar-track { background: transparent; }
 .scroll-fine::-webkit-scrollbar-thumb {
-  background: color-mix(in oklab, var(--color-accent-500) 34%, transparent);
+  background: color-mix(in oklab, var(--color-accent-500) 30%, transparent);
   border-radius: 9999px;
   border: 2px solid transparent;
   background-clip: padding-box;
@@ -302,25 +258,12 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-fade-up,
   .animate-menu,
-  .animate-word,
-  .animate-reveal,
-  .pop-in,
-  .animate-float,
-  .animate-scan,
+  .animate-drawer,
+  .animate-fade,
   .grow-x,
-  .flow-dot,
-  .animate-shimmer::after,
-  .ring-glow::before {
+  .hero-orb {
     animation: none !important;
   }
-  .reveal {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-  html {
-    scroll-behavior: auto;
-  }
+  html { scroll-behavior: auto; }
 }

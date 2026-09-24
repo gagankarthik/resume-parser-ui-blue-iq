@@ -53,7 +53,7 @@ function StatusPill({ status, ms }: { status: number; ms: number }) {
 function JsonBlock({ value, max = "max-h-[26rem]" }: { value: unknown; max?: string }) {
   const text = typeof value === "string" ? value : JSON.stringify(value, null, 2);
   return (
-    <pre className={cn("overflow-auto rounded-xl border border-line bg-paper/70 p-4 font-mono text-[12.5px] leading-relaxed text-ink", max)}>{text}</pre>
+    <pre className={cn("overflow-auto panel-lift rounded-xl bg-white ring-1 ring-black/[0.04] p-4 font-mono text-[12.5px] leading-relaxed text-ink", max)}>{text}</pre>
   );
 }
 
@@ -130,9 +130,8 @@ export default function DataClient({ tables }: { tables: TableRef[] }) {
   return (
     <div>
       <div className="mb-6">
-        <p className="label-caps text-accent-700">Admin - DynamoDB</p>
-        <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight text-ink">Data viewer</h1>
-        <p className="mt-1 text-sm text-ink-soft">Live contents of the resume-parser tables (region us-east-2). Read-only.</p>
+        <h1 className="text-[1.9rem] font-medium leading-tight tracking-[-0.02em] text-ink sm:text-[2.1rem]">Data viewer</h1>
+        <p className="mt-1.5 max-w-2xl text-[15px] leading-relaxed text-ink-soft">Live contents of the resume-parser tables (region us-east-2). Read-only.</p>
       </div>
 
       {/* At-a-glance: every table + item count */}
@@ -146,8 +145,8 @@ export default function DataClient({ tables }: { tables: TableRef[] }) {
               active === t.id ? "border-accent-300 bg-accent-50 shadow-sm" : "border-line bg-surface hover:border-accent-200",
             )}
           >
-            <p className="truncate text-[11px] font-medium uppercase tracking-wide text-ink-soft">{t.label}</p>
-            <p className="mt-1 font-display text-2xl font-semibold tabular-nums text-ink">
+            <p className="truncate text-xs font-semibold text-ink-soft">{t.label}</p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums text-ink">
               {(t as TableSummary).count >= 0 ? (t as TableSummary).count.toLocaleString() : "..."}
             </p>
             {"ok" in t && !(t as TableSummary).ok && <p className="text-[10px] text-red-600">unreachable</p>}
@@ -176,7 +175,7 @@ export default function DataClient({ tables }: { tables: TableRef[] }) {
           <span className="text-sm text-ink-soft">
             <span className="font-mono font-semibold text-ink">{data.count}</span> items
             {data.truncated && <span className="ml-1 text-amber-600"> - truncated at 300</span>}
-            <span className="ml-2 font-mono text-xs text-ink-soft/70">{data.name}</span>
+            <span className="ml-2 font-mono text-xs text-ink-soft">{data.name}</span>
           </span>
         )}
         <div className="ml-auto flex items-center gap-2">

@@ -43,24 +43,20 @@ export default function AdminClient() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex items-start gap-3">
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-accent-50 text-accent-700 ring-1 ring-inset ring-accent-200">
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.4-3 7.6-7 8.6C8 18.6 5 15.4 5 11V6l7-3z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" /><path d="M9.5 12l1.8 1.8 3.4-3.6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </span>
           <div>
-            <p className="label-caps text-accent-700">Platform · Admin</p>
-            <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight text-ink">Overview</h1>
-            <p className="mt-1 text-sm text-ink-soft">Usage across the whole platform.</p>
+            <h1 className="text-[1.9rem] font-medium leading-tight tracking-[-0.02em] text-ink sm:text-[2.1rem]">Overview</h1>
+            <p className="mt-1.5 max-w-2xl text-[15px] leading-relaxed text-ink-soft">Usage across the whole platform.</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex gap-1 rounded-lg border border-line p-1">
+          <div className="flex gap-0.5 rounded-lg bg-paper p-1 ring-1 ring-inset ring-line">
             {[7, 30, 90].map((d) => (
               <button
                 key={d}
                 onClick={() => setDays(d)}
                 className={
                   "rounded-md px-3 py-1 text-sm font-medium transition-colors " +
-                  (d === days ? "bg-accent-700 text-[var(--surface)]" : "text-ink-soft hover:bg-black/[0.04]")
+                  (d === days ? "bg-surface text-ink shadow-[0_1px_2px_rgba(12,26,58,0.12)] ring-1 ring-line" : "text-ink-soft hover:text-ink")
                 }
               >
                 {d}d
@@ -81,9 +77,9 @@ export default function AdminClient() {
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard label="Users" value={stats.companies.total.toLocaleString()} sub={`${stats.companies.active} active`} accent="accent" icon={<UsersIcon />} />
-            <StatCard label={`Jobs · ${days}d`} value={t!.jobs.toLocaleString()} sub={`${stats.active_keys} active keys`} accent="ink" icon={<JobsIcon />} />
+            <StatCard label={`Jobs, last ${days} days`} value={t!.jobs.toLocaleString()} sub={`${stats.active_keys} active keys`} accent="ink" icon={<JobsIcon />} />
             <StatCard label="Tokens used" value={t!.tokens_used.toLocaleString()} accent="brass" icon={<TokenIcon />} />
-            <StatCard label="Success rate" value={`${successRate}%`} sub={`${t!.completed} ok · ${t!.failed} failed`} accent={successRate >= 90 ? "accent" : successRate >= 70 ? "amber" : "rose"} icon={<SuccessIcon />} />
+            <StatCard label="Success rate" value={`${successRate}%`} sub={`${t!.completed} completed, ${t!.failed} failed`} accent={successRate >= 90 ? "accent" : successRate >= 70 ? "amber" : "rose"} icon={<SuccessIcon />} />
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
@@ -110,11 +106,11 @@ export default function AdminClient() {
 
           <Link
             href="/dashboard/admin/customers"
-            className="group flex items-center justify-between rounded-2xl border border-line bg-surface p-5 transition-all hover:-translate-y-0.5 hover:border-accent-200 hover:shadow-[0_18px_40px_-30px_rgba(10,23,51,0.4)]"
+            className="group flex items-center justify-between glow-soft card-lift rounded-[20px] border border-transparent p-5 transition-colors hover:border-black"
           >
             <span>
-              <span className="block font-display text-base font-semibold tracking-tight text-ink">View all customers</span>
-              <span className="block text-sm text-ink-soft">{stats.companies.total.toLocaleString()} organisations · usage, keys, logs &amp; controls</span>
+              <span className="block text-base font-semibold tracking-tight text-ink">View all customers</span>
+              <span className="block text-sm text-ink-soft">{stats.companies.total.toLocaleString()} organisations with their usage, keys, logs and controls</span>
             </span>
             <svg className="h-5 w-5 text-ink-soft transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </Link>
@@ -126,9 +122,9 @@ export default function AdminClient() {
 
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-line bg-surface p-4">
+    <div className="glow-soft card-lift rounded-[20px] p-4">
       <div className="label-caps text-ink-soft">{label}</div>
-      <div className="mt-1.5 font-display text-xl font-semibold tabular-nums text-ink">{value}</div>
+      <div className="mt-1.5 text-xl font-semibold tabular-nums text-ink">{value}</div>
     </div>
   );
 }
