@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect } from "react";
 
+import { UnpluggedArt } from "@/components/illustrations";
 import { Button } from "@/components/ui";
 
 /**
@@ -18,32 +19,28 @@ export default function DashboardError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // eslint-disable-next-line no-console
     console.error("[dashboard]", error);
   }, [error]);
 
   return (
     <div className="grid min-h-[60vh] place-items-center">
-      <div className="w-full max-w-md text-center">
-        <div className="rounded-2xl border border-line bg-surface p-8">
-          <h1 className="font-display text-xl font-bold tracking-tight text-ink">
-            Something went wrong here.
-          </h1>
-          <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">
-            This page failed to load. It is usually a temporary problem reaching the API.
-          </p>
-          {error.digest && (
-            <p className="mt-3 font-mono text-[11px] text-ink-soft/60">ref {error.digest}</p>
-          )}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
-            <Button onClick={reset} type="button">Try again</Button>
-            <Link
-              href="/dashboard"
-              className="inline-flex h-10 items-center rounded-lg border border-line-strong bg-surface px-4 text-sm font-medium text-ink transition-colors hover:border-accent-300 hover:bg-accent-50"
-            >
-              Back to dashboard
-            </Link>
-          </div>
+      <div className="glow-peach card-lift w-full max-w-md rounded-[20px] px-6 py-10 text-center">
+        <UnpluggedArt className="mx-auto h-auto w-52" />
+        <h1 className="mt-6 text-xl font-semibold text-[#1e293b]">This page could not load</h1>
+        <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">
+          The dashboard lost its connection to the API. That is usually brief; try again in a moment.
+        </p>
+        {error.digest && <p className="mt-3 font-mono text-xs text-ink-soft">Reference {error.digest}</p>}
+        <div className="mt-6 flex flex-col justify-center gap-2.5 sm:flex-row">
+          <Button onClick={reset} type="button">
+            Try again
+          </Button>
+          <Link
+            href="/dashboard"
+            className="inline-flex h-10 items-center justify-center rounded-[10px] border border-black bg-white px-4 text-sm font-semibold text-[#0f172a] transition-colors hover:bg-[#f4f8f9]"
+          >
+            Back to overview
+          </Link>
         </div>
       </div>
     </div>

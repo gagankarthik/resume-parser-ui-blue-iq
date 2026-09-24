@@ -1,13 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Fragment, useEffect, useState } from "react";
 
+import {
+  AdminIcon,
+  CollapseIcon,
+  CustomersIcon,
+  DatabaseIcon,
+  DocsIcon,
+  EndpointIcon,
+  KeyIcon,
+  OverviewIcon,
+  WebhookIcon,
+} from "@/components/icons";
 import { BrandMark, Logo } from "@/components/ui";
-import { logout } from "@/lib/account";
 
-type NavItem = { href: string; label: string; icon: (p: { active?: boolean }) => React.ReactElement };
+type NavItem = { href: string; label: string; icon: (p: { className?: string }) => React.ReactElement };
 
 // One sidebar for everyone. Users see the user section; admins see the same
 // section plus an Admin group beneath it. The old design was two separate navs
@@ -27,26 +37,7 @@ const ADMIN_NAV: NavItem[] = [
   { href: "/dashboard/admin/data", label: "Data", icon: DatabaseIcon },
 ];
 
-function EndpointIcon({ active }: { active?: boolean }) {
-  const w = active ? 1.9 : 1.7;
-  return (
-    <svg className={cls} viewBox="0 0 24 24" fill="none">
-      <circle cx="6" cy="12" r="2.6" stroke="currentColor" strokeWidth={w} />
-      <circle cx="18" cy="6.5" r="2.4" stroke="currentColor" strokeWidth={w} />
-      <circle cx="18" cy="17.5" r="2.4" stroke="currentColor" strokeWidth={w} />
-      <path d="M8.4 10.9 15.7 7.6M8.4 13.1l7.3 3.3" stroke="currentColor" strokeWidth={w} strokeLinecap="round" />
-    </svg>
-  );
-}
 
-function DatabaseIcon({ active }: { active?: boolean }) {
-  return (
-    <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" strokeWidth={active ? 2 : 1.7}>
-      <ellipse cx="12" cy="5" rx="8" ry="3" stroke="currentColor" strokeWidth="inherit" />
-      <path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6" stroke="currentColor" strokeWidth="inherit" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 
 
@@ -82,7 +73,7 @@ function NavLinks({
             {startsAdmin && (
               <div className="pt-4">
                 {!collapsed && (
-                  <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-ink-soft/55">
+                  <p className="px-3 pb-2 text-xs font-semibold text-ink-soft">
                     Admin
                   </p>
                 )}
@@ -95,18 +86,15 @@ function NavLinks({
             title={collapsed ? label : undefined}
             aria-label={label}
             className={
-              "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all " +
+              "group relative flex items-center gap-3 rounded-[12px] border px-3 py-2.5 text-sm font-medium transition-colors " +
               (collapsed ? "justify-center " : "") +
               (active
-                ? "bg-accent-50 text-accent-800 shadow-[inset_0_0_0_1px_var(--color-accent-200)]"
-                : "text-ink-soft hover:bg-black/[0.035] hover:text-ink")
+                ? "pill-lift border-black bg-white text-[#0f172a]"
+                : "border-transparent text-[#475569] hover:bg-white/70 hover:text-[#0f172a]")
             }
           >
-            {active && !collapsed && (
-              <span aria-hidden className="absolute -left-3 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-accent-700" />
-            )}
-            <span className={active ? "text-accent-700" : "text-ink-soft/80 group-hover:text-ink"}>
-              <Icon active={active} />
+                        <span className={active ? "text-accent-600" : "text-ink-soft group-hover:text-[#0f172a]"}>
+              <Icon className="h-[19px] w-[19px] shrink-0" />
             </span>
             {!collapsed && <span className="truncate">{label}</span>}
           </Link>
@@ -117,58 +105,8 @@ function NavLinks({
   );
 }
 
-/** Account block: clicking the identity opens the Profile page; sign-out is separate. */
-function Account({ email, collapsed }: { email: string; collapsed?: boolean }) {
-  const router = useRouter();
-  const initial = (email || "?").charAt(0).toUpperCase();
-
-  async function onSignOut() {
-    await logout();
-    router.push("/login");
-    router.refresh();
-  }
-
-  return (
-    <div className="space-y-1 border-t border-line pt-3">
-      <Link
-        href="/dashboard/profile"
-        title={collapsed ? "Profile" : undefined}
-        className={
-          "flex items-center gap-2.5 rounded-xl p-2 transition-colors hover:bg-black/[0.04] " +
-          (collapsed ? "justify-center" : "")
-        }
-      >
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-accent-600 text-sm font-semibold text-white shadow-sm ring-1 ring-black/10">
-          {initial}
-        </span>
-        {!collapsed && (
-          <>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-semibold text-ink">Profile</span>
-              <span className="block truncate font-mono text-[11px] text-ink-soft" title={email}>{email}</span>
-            </span>
-            <svg className="h-4 w-4 shrink-0 text-ink-soft/60" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </>
-        )}
-      </Link>
-      <button
-        onClick={onSignOut}
-        title={collapsed ? "Sign out" : undefined}
-        aria-label="Sign out"
-        className={
-          "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-ink-soft transition-colors hover:bg-black/[0.04] hover:text-ink " +
-          (collapsed ? "justify-center" : "")
-        }
-      >
-        <LogoutIcon />
-        {!collapsed && "Sign out"}
-      </button>
-    </div>
-  );
-}
-
 /** Desktop rail (md+) - collapsible, persisted to localStorage. */
-export function Sidebar({ email, isAdmin }: { email: string; isAdmin?: boolean }) {
+export function Sidebar({ isAdmin }: { email?: string; isAdmin?: boolean }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -189,20 +127,20 @@ export function Sidebar({ email, isAdmin }: { email: string; isAdmin?: boolean }
   return (
     <div className={"hidden shrink-0 md:block " + w}>
       <div className={"fixed h-screen " + w}>
-        <aside className="flex h-full flex-col border-r border-line bg-paper">
+        <aside className="flex h-full flex-col border-r border-black/[0.06] bg-dash">
           {/* Header */}
-          <div className={"flex h-16 shrink-0 items-center border-b border-line " + (collapsed ? "justify-center px-2" : "justify-between px-4")}>
+          <div className={"flex h-16 shrink-0 items-center " + (collapsed ? "justify-center px-2" : "justify-between px-4")}>
             <Link href="/dashboard" aria-label="Blue-IQ dashboard">
-              {collapsed ? <BrandMark className="h-8 w-8" /> : <Logo className="h-7 w-auto" />}
+              {collapsed ? <BrandMark className="h-7 w-7" /> : <Logo className="h-[22px] w-auto" />}
             </Link>
             {!collapsed && (
               <button
                 onClick={toggle}
                 aria-label="Collapse sidebar"
                 title="Collapse"
-                className="grid h-8 w-8 place-items-center rounded-lg text-ink-soft transition-colors hover:bg-black/[0.04] hover:text-ink"
+                className="grid h-8 w-8 place-items-center rounded-lg text-ink-soft transition-colors hover:bg-white/70 hover:text-[#0f172a]"
               >
-                <CollapseIcon collapsed={false} />
+                <CollapseIcon className="h-[18px] w-[18px]" />
               </button>
             )}
           </div>
@@ -215,16 +153,12 @@ export function Sidebar({ email, isAdmin }: { email: string; isAdmin?: boolean }
                 onClick={toggle}
                 aria-label="Expand sidebar"
                 title="Expand"
-                className="grid h-9 w-9 place-items-center rounded-lg text-ink-soft transition-colors hover:bg-black/[0.04] hover:text-ink"
+                className="grid h-9 w-9 place-items-center rounded-lg text-ink-soft transition-colors hover:bg-white/70 hover:text-[#0f172a]"
               >
-                <CollapseIcon collapsed />
+                <CollapseIcon collapsed className="h-[18px] w-[18px]" />
               </button>
             </div>
           )}
-
-          <div className={"shrink-0 " + (collapsed ? "px-2 pb-4" : "px-3 pb-4")}>
-            <Account email={email} collapsed={collapsed} />
-          </div>
         </aside>
       </div>
     </div>
@@ -232,7 +166,7 @@ export function Sidebar({ email, isAdmin }: { email: string; isAdmin?: boolean }
 }
 
 /** Mobile hamburger + slide-over drawer. */
-export function MobileNav({ email, isAdmin }: { email: string; isAdmin?: boolean }) {
+export function MobileNav({ isAdmin }: { email?: string; isAdmin?: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -250,7 +184,7 @@ export function MobileNav({ email, isAdmin }: { email: string; isAdmin?: boolean
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open menu"
-        className="grid h-10 w-10 place-items-center rounded-xl text-ink-soft hover:bg-black/[0.04]"
+        className="grid h-10 w-10 place-items-center rounded-full border border-black bg-white text-ink"
       >
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
           <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
@@ -260,18 +194,18 @@ export function MobileNav({ email, isAdmin }: { email: string; isAdmin?: boolean
       {open && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
-            className="absolute inset-0 bg-ink/30 backdrop-blur-[2px]"
+            className="animate-fade absolute inset-0 bg-ink/40"
             onClick={() => setOpen(false)}
             aria-hidden
           />
-          <div className="absolute inset-y-0 left-0 flex w-72 max-w-[82%] flex-col gap-1 border-r border-line bg-paper px-3 py-5 shadow-2xl">
+          <div role="dialog" aria-modal="true" aria-label="Navigation" className="animate-drawer absolute inset-y-0 left-0 bg-dash flex w-72 max-w-[85%] flex-col gap-1 px-3 py-5 shadow-2xl">
             <div className="mb-5 flex items-center justify-between px-2">
-              <Logo className="h-7 w-auto" />
+              <Logo className="h-[22px] w-auto" />
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close menu"
-                className="grid h-9 w-9 place-items-center rounded-lg text-ink-soft hover:bg-black/[0.04]"
+                className="grid h-9 w-9 place-items-center rounded-full text-[#475569] hover:bg-white/70 hover:text-[#0f172a]"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
                   <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
@@ -279,52 +213,9 @@ export function MobileNav({ email, isAdmin }: { email: string; isAdmin?: boolean
               </button>
             </div>
             <NavLinks pathname={pathname} onNavigate={() => setOpen(false)} isAdmin={isAdmin} />
-            <Account email={email} />
           </div>
         </div>
       )}
     </>
-  );
-}
-
-/* ── Icons ─────────────────────────────────────────────────────────────────── */
-const cls = "h-[18px] w-[18px] shrink-0";
-function OverviewIcon({ active }: { active?: boolean }) {
-  return <svg className={cls} viewBox="0 0 24 24" fill="none"><path d="M4 13h7V4H4v9zM13 20h7V4h-7v16zM4 20h7v-4H4v4z" stroke="currentColor" strokeWidth={active ? 1.9 : 1.7} strokeLinejoin="round" /></svg>;
-}
-/** Three separate pieces, not one doubling-back path: a true circular bow, a
- *  straight shaft starting exactly on the bow's edge, and two teeth square to
- *  the shaft. The old single-path version collapsed into a blob at 18px. */
-function KeyIcon({ active }: { active?: boolean }) {
-  const w = active ? 1.9 : 1.7;
-  return (
-    <svg className={cls} viewBox="0 0 24 24" fill="none">
-      <circle cx="8.4" cy="15.6" r="4.2" stroke="currentColor" strokeWidth={w} />
-      <path d="M11.4 12.6 19.6 4.4" stroke="currentColor" strokeWidth={w} strokeLinecap="round" />
-      <path d="m16.1 7.9 1.8 1.8M17.9 6.1l1.8 1.8" stroke="currentColor" strokeWidth={w} strokeLinecap="round" />
-    </svg>
-  );
-}
-function WebhookIcon({ active }: { active?: boolean }) {
-  return <svg className={cls} viewBox="0 0 24 24" fill="none"><path d="M9 7a3 3 0 1 1 4 2.8L10 15M7 13a3 3 0 1 0 3 3h6M17 13a3 3 0 1 1-2.8 4" stroke="currentColor" strokeWidth={active ? 1.9 : 1.7} strokeLinecap="round" strokeLinejoin="round" /></svg>;
-}
-function DocsIcon({ active }: { active?: boolean }) {
-  return <svg className={cls} viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7zM14 3v4h4M9 12h6M9 16h6" stroke="currentColor" strokeWidth={active ? 1.9 : 1.7} strokeLinejoin="round" /></svg>;
-}
-function AdminIcon({ active }: { active?: boolean }) {
-  return <svg className={cls} viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.4-3 7.6-7 8.6C8 18.6 5 15.4 5 11V6l7-3z" stroke="currentColor" strokeWidth={active ? 1.9 : 1.7} strokeLinejoin="round" /><path d="M9.5 12l1.8 1.8 3.4-3.6" stroke="currentColor" strokeWidth={active ? 1.9 : 1.7} strokeLinecap="round" strokeLinejoin="round" /></svg>;
-}
-function CustomersIcon({ active }: { active?: boolean }) {
-  return <svg className={cls} viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="currentColor" strokeWidth={active ? 1.9 : 1.7} /><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 6.2a3 3 0 0 1 0 5.6M16.5 19a5.5 5.5 0 0 0-2.7-4.7" stroke="currentColor" strokeWidth={active ? 1.9 : 1.7} strokeLinecap="round" strokeLinejoin="round" /></svg>;
-}
-function LogoutIcon() {
-  return <svg className={cls} viewBox="0 0 24 24" fill="none"><path d="M15 12H6m9 0-3-3m3 3-3 3M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>;
-}
-function CollapseIcon({ collapsed }: { collapsed?: boolean }) {
-  return (
-    <svg className={cls + (collapsed ? " rotate-180" : "")} viewBox="0 0 24 24" fill="none">
-      <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M20 4v16" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-    </svg>
   );
 }

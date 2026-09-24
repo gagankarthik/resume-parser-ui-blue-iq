@@ -1,53 +1,48 @@
-import type { Metadata } from "next";
-import { Space_Grotesk, Inter, IBM_Plex_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Instrument_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ORG_NAME, SITE_NAME, SITE_URL } from "@/lib/site";
 
-// Space Grotesk display, set light: matches the Blue-IQ platform brand.
-const display = Space_Grotesk({
-  variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-});
-
-// Inter for body/UI, consistent with the Blue-IQ platform.
-const sans = Inter({
+// One family for display and body. Headlines are set medium with tight
+// tracking, the way the landing page's feature row sets them; weight and size
+// carry the hierarchy, not a second typeface.
+const sans = Instrument_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
   display: "swap",
 });
 
-// Technical mono for keys, code, and tabular data.
-const mono = IBM_Plex_Mono({
+// Mono for code, keys and JSON field names only.
+const mono = Geist_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   display: "swap",
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-
 const DESCRIPTION =
-  "Blue-IQ Capture turns any document - resumes, contracts, invoices, licenses - into structured, confidence-scored data. Domain-tuned, never fabricates. Powered by the Sonar engine.";
+  "Resume parsing API that turns resumes, licenses and certifications into structured JSON with a confidence score on every field. Never invents a value.";
 
-// Site-wide SEO defaults. Individual routes override `title`/`description` and
-// inherit everything else, so no page ships without OG tags, a canonical URL or
-// an explicit robots directive. Private routes flip `robots` to noindex in their
-// own layout (see app/dashboard/layout.tsx).
+// Site-wide SEO defaults. Routes override `title`, `description` and their own
+// canonical; everything else is inherited. There is deliberately no canonical
+// here: a root canonical is inherited by every route that forgets its own and
+// declares that page a duplicate of the home page. Private routes flip
+// `robots` to noindex in their own layout (see app/dashboard/layout.tsx).
+// Icons come from the file conventions (favicon.ico, icon.svg, apple-icon).
+export const viewport: Viewport = { themeColor: "#1a5fe6" };
+
 export const metadata: Metadata = {
-  // Resolves canonical/OG URLs; set NEXT_PUBLIC_SITE_URL to the public domain in prod.
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Blue-IQ Capture | Universal Document AI",
-    template: "%s - Blue-IQ Capture",
+    default: `${SITE_NAME}: Resume Parsing API with Confidence Scores`,
+    template: `%s | ${SITE_NAME}`,
   },
   description: DESCRIPTION,
-  applicationName: "Blue-IQ Capture",
-  authors: [{ name: "Ocean Blue Solutions" }],
-  creator: "Ocean Blue Solutions",
-  publisher: "Ocean Blue Solutions",
+  applicationName: SITE_NAME,
+  authors: [{ name: ORG_NAME }],
+  creator: ORG_NAME,
+  publisher: ORG_NAME,
   category: "technology",
-  alternates: { canonical: "/" },
   robots: {
     index: true,
     follow: true,
@@ -61,19 +56,18 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    siteName: "Blue-IQ Capture",
+    siteName: SITE_NAME,
     locale: "en_US",
-    url: SITE_URL,
-    title: "Blue-IQ Capture | Universal Document AI",
+    url: "/",
+    title: `${SITE_NAME}: Resume Parsing API with Confidence Scores`,
     description: DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Blue-IQ Capture | Universal Document AI",
-    description: "Any document in. Structured, scored data out. Powered by the Sonar engine.",
+    title: `${SITE_NAME}: Resume Parsing API with Confidence Scores`,
+    description: DESCRIPTION,
   },
   formatDetection: { telephone: false, address: false, email: false },
-  icons: { icon: "/favicon.ico", shortcut: "/favicon.ico" },
 };
 
 export default function RootLayout({
@@ -84,7 +78,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${display.variable} ${sans.variable} ${mono.variable} h-full antialiased`}
+      className={`${sans.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="min-h-full">{children}</body>
     </html>

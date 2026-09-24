@@ -28,7 +28,7 @@ export function PasswordInput({ className, ...rest }: InputHTMLAttributes<HTMLIn
         onClick={() => setShown((v) => !v)}
         aria-label={shown ? "Hide password" : "Show password"}
         aria-pressed={shown}
-        className="absolute right-1 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-lg text-ink-soft transition-colors hover:bg-black/[0.04] hover:text-ink"
+        className="absolute right-1 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-md text-ink-soft transition-colors hover:bg-accent-50 hover:text-ink"
       >
         {shown ? (
           <svg viewBox="0 0 24 24" width={18} height={18} fill="none" aria-hidden>

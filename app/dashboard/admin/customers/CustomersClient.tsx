@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { UsersIcon } from "@/components/icons";
 import { Badge, Button, EmptyState, ErrorBanner, Spinner, TBody, TD, TH, THead, TR, Table } from "@/components/ui";
 import { getPlatformStats } from "@/lib/account";
 import { ApiError, type PlatformStats } from "@/lib/types";
@@ -51,24 +50,20 @@ export default function CustomersClient() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex items-start gap-3">
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-accent-50 text-accent-700 ring-1 ring-inset ring-accent-200">
-            <UsersIcon className="h-5 w-5" />
-          </span>
           <div>
-            <p className="label-caps text-accent-700">Platform - Admin</p>
-            <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight text-ink">Customers</h1>
-            <p className="mt-1 text-sm text-ink-soft">Every organisation, its usage, and account controls.</p>
+            <h1 className="text-[1.9rem] font-medium leading-tight tracking-[-0.02em] text-ink sm:text-[2.1rem]">Customers</h1>
+            <p className="mt-1.5 max-w-2xl text-[15px] leading-relaxed text-ink-soft">Every organisation, its usage, and account controls.</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex gap-1 rounded-lg border border-line p-1">
+          <div className="flex gap-0.5 rounded-lg bg-paper p-1 ring-1 ring-inset ring-line">
             {[7, 30, 90].map((d) => (
               <button
                 key={d}
                 onClick={() => setDays(d)}
                 className={
                   "rounded-md px-3 py-1 text-sm font-medium transition-colors " +
-                  (d === days ? "bg-accent-700 text-[var(--surface)]" : "text-ink-soft hover:bg-black/[0.04]")
+                  (d === days ? "bg-surface text-ink shadow-[0_1px_2px_rgba(12,26,58,0.12)] ring-1 ring-line" : "text-ink-soft hover:text-ink")
                 }
               >
                 {d}d
@@ -86,24 +81,24 @@ export default function CustomersClient() {
           <Spinner /> Loading customers...
         </div>
       ) : stats ? (
-        <div className="overflow-hidden rounded-2xl border border-line bg-surface">
+        <div className="overflow-hidden glow-soft card-lift rounded-[20px]">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-3.5">
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search name, email, or id..."
-              className="h-9 w-64 max-w-full rounded-lg border border-line-strong bg-surface px-3 text-sm text-ink outline-none placeholder:text-ink-soft/60 focus:border-accent-500"
+              className="h-9 w-64 max-w-full rounded-[10px] border border-line-strong bg-white px-3 text-sm text-ink outline-none placeholder:text-[#64748b] focus:border-accent-500"
             />
             <div className="flex items-center gap-2 text-xs text-ink-soft">
               <span>Sort by</span>
-              <div className="flex gap-1 rounded-lg border border-line p-1">
+              <div className="flex gap-0.5 rounded-lg bg-paper p-1 ring-1 ring-inset ring-line">
                 {(["jobs", "tokens"] as SortKey[]).map((k) => (
                   <button
                     key={k}
                     onClick={() => setSort(k)}
                     className={
                       "rounded-md px-2.5 py-1 font-medium capitalize transition-colors " +
-                      (sort === k ? "bg-accent-700 text-[var(--surface)]" : "text-ink-soft hover:bg-black/[0.04]")
+                      (sort === k ? "bg-accent-600 text-white" : "text-ink-soft hover:bg-accent-50")
                     }
                   >
                     {k}

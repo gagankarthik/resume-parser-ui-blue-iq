@@ -1,12 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { Badge, Button, Card, ErrorBanner, Input, Label, SectionTitle, Spinner } from "@/components/ui";
+import { CopyButton, RelativeTime, SearchField, SecretPanel, Toolbar, useConfirm } from "@/components/dashboard/kit";
+import { AlertIcon, RefreshIcon, TrashIcon, WebhookIcon } from "@/components/icons";
+import { HookArt } from "@/components/illustrations";
+import { Button, Card, EmptyState, ErrorBanner, Input, Label, PageHeader, Skeleton, Tabs } from "@/components/ui";
 import { createWebhook, deleteWebhook, listWebhooks } from "@/lib/account";
 import { ApiError, type CreatedWebhook, type Webhook, type WebhookEvent } from "@/lib/types";
 
-const EVENTS: WebhookEvent[] = ["parse.completed", "parse.failed", "batch.completed"];
+const EVENTS: { id: WebhookEvent; label: string; hint: string }[] = [
+  { id: "parse.completed", label: "parse.completed", hint: "A single parse finished." },
+  { id: "parse.failed", label: "parse.failed", hint: "A single parse failed, with its error code." },
+  { id: "batch.completed", label: "batch.completed", hint: "Every file in a batch is done." },
+];
+
+type EventFilter = "all" | WebhookEvent;
 
 function errMsg(e: unknown): string {
   return e instanceof ApiError ? e.message : e instanceof Error ? e.message : "Unexpected error";
@@ -25,6 +34,16 @@ function sameEndpoint(a: string, b: string): boolean {
   return norm(a) === norm(b);
 }
 
+/** Host shown large, path small: the host is what people scan for. */
+function splitUrl(u: string): { host: string; rest: string } {
+  try {
+    const p = new URL(u);
+    return { host: p.host, rest: `${p.pathname}${p.search}` };
+  } catch {
+    return { host: u, rest: "" };
+  }
+}
+
 export default function WebhooksPage() {
   const [hooks, setHooks] = useState<Webhook[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,8 +53,11 @@ export default function WebhooksPage() {
   const [events, setEvents] = useState<WebhookEvent[]>(["parse.completed", "parse.failed"]);
   const [creating, setCreating] = useState(false);
   const [created, setCreated] = useState<CreatedWebhook | null>(null);
-  const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
+
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<EventFilter>("all");
+  const [confirm, dialog] = useConfirm();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -67,17 +89,20 @@ export default function WebhooksPage() {
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!url.trim() || events.length === 0) return;
-    if (
-      duplicate &&
-      !window.confirm(
-        `${duplicate.url} is already registered.\n\n` +
-          "Adding it again creates a SECOND registration with its own signing secret. " +
-          "Both will receive every event, and the secret you already have will only verify " +
-          "one of them - the other's deliveries get rejected and dropped.\n\n" +
-          "Delete the existing registration instead, unless you genuinely want two.",
-      )
-    ) {
-      return;
+    if (duplicate) {
+      const ok = await confirm({
+        title: "This URL is already registered",
+        body: (
+          <>
+            Adding it again creates a <b className="text-ink">second</b> registration with its own signing secret. Both
+            receive every event, and the secret you already hold verifies only one of them; the other&apos;s deliveries
+            are rejected and dropped. Delete the existing registration instead, unless you really want two.
+          </>
+        ),
+        confirm: "Add a second registration",
+        tone: "danger",
+      });
+      if (!ok) return;
     }
     setCreating(true);
     setError("");
@@ -93,11 +118,22 @@ export default function WebhooksPage() {
     }
   }
 
-  async function onDelete(id: string) {
-    if (!window.confirm("Delete this webhook?")) return;
-    setBusy(id);
+  async function onDelete(h: Webhook) {
+    const ok = await confirm({
+      title: "Delete this webhook?",
+      body: (
+        <>
+          <span className="break-all font-mono text-[13px] text-ink">{h.url}</span> stops receiving events immediately. Anything
+          still in flight is not redelivered.
+        </>
+      ),
+      confirm: "Delete webhook",
+      tone: "danger",
+    });
+    if (!ok) return;
+    setBusy(h.webhook_id);
     try {
-      await deleteWebhook(id);
+      await deleteWebhook(h.webhook_id);
       await load();
     } catch (e) {
       setError(errMsg(e));
@@ -106,117 +142,194 @@ export default function WebhooksPage() {
     }
   }
 
+  const counts = useMemo(() => {
+    const c: Record<EventFilter, number> = { all: hooks.length, "parse.completed": 0, "parse.failed": 0, "batch.completed": 0 };
+    for (const h of hooks) for (const ev of h.events) c[ev] += 1;
+    return c;
+  }, [hooks]);
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return hooks
+      .filter((h) => filter === "all" || h.events.includes(filter))
+      .filter((h) => !q || h.url.toLowerCase().includes(q))
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }, [hooks, query, filter]);
+
   return (
     <div className="space-y-6">
-      <div className="flex items-start gap-3">
-        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-accent-50 text-accent-700 ring-1 ring-inset ring-accent-200">
-          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none"><path d="M9 7a3 3 0 1 1 4 2.8L10 15M7 13a3 3 0 1 0 3 3h6M17 13a3 3 0 1 1-2.8 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        </span>
-        <div>
-          <p className="label-caps text-accent-700">Delivery</p>
-          <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight text-ink">Webhooks</h1>
-          <p className="mt-1 text-sm text-ink-soft">
-            Receive signed callbacks when parsing jobs complete. URLs must be public HTTPS.
-          </p>
-        </div>
-      </div>
+      {dialog}
+      <PageHeader
+        title="Webhooks"
+        description="Get parse results pushed to your server instead of polling. Every delivery is signed with HMAC-SHA256."
+      />
 
       {error && <ErrorBanner message={error} />}
 
       {created && (
-        <div className="overflow-hidden rounded-2xl border border-brass-400/50 bg-surface shadow-[0_1px_2px_rgba(10,23,51,0.04),0_16px_40px_-24px_rgba(10,23,51,0.28)]">
-          <div className="flex items-center justify-between border-b border-brass-400/30 bg-brass-400/10 px-5 py-3">
-            <h3 className="font-display text-sm font-semibold text-ink">Signing secret - copy it now</h3>
-            <button onClick={() => setCreated(null)} className="text-sm text-ink-soft hover:text-ink">Dismiss</button>
-          </div>
-          <div className="p-5">
-            <p className="mb-3 text-sm text-ink-soft">
-              Verify deliveries with HMAC-SHA256 over <code className="font-mono text-ink">{"{timestamp}.{body}"}</code>. Shown once.
-            </p>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <code className="flex-1 overflow-x-auto rounded-lg border border-line bg-paper px-3 py-2.5 font-mono text-sm text-ink">{created.hmac_secret}</code>
-              <Button
-                variant="secondary"
-                type="button"
-                onClick={async () => {
-                  await navigator.clipboard.writeText(created.hmac_secret);
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 2000);
-                }}
-              >
-                {copied ? "Copied" : "Copy"}
-              </Button>
-            </div>
-          </div>
-        </div>
+        <SecretPanel
+          title="Copy the signing secret now"
+          value={created.hmac_secret}
+          hint={
+            <>
+              Verify each delivery with HMAC-SHA256 over <code className="font-mono text-[13px] text-ink">{"{timestamp}.{raw body}"}</code>.
+              The secret belongs to this registration and is never shown again.
+            </>
+          }
+          onDismiss={() => setCreated(null)}
+        />
       )}
 
-      <Card>
-        <SectionTitle hint="At least one event. HTTPS only.">Add a webhook</SectionTitle>
-        <form onSubmit={onCreate} className="space-y-4">
-          <div>
-            <Label>Endpoint URL</Label>
-            <Input type="url" value={url} placeholder="https://your-server.com/hooks/resume" onChange={(e) => setUrl(e.target.value)} required />
-            {duplicate && (
-              <p className="mt-2 text-sm text-brass-600">
-                Already registered. A second registration gets its own signing secret, and the
-                secret you hold will verify only one of the two - the other endpoint&apos;s
-                deliveries are rejected and dropped. Delete the existing one instead.
-              </p>
-            )}
-          </div>
-          <div>
-            <Label>Events</Label>
-            <div className="flex flex-wrap gap-2.5">
-              {EVENTS.map((ev) => {
-                const on = events.includes(ev);
+      <div className="grid items-start gap-6 xl:grid-cols-[24rem_minmax(0,1fr)]">
+        {/* Register */}
+        <Card className="xl:sticky xl:top-6">
+          <h2 className="text-[1.05rem] font-semibold text-[#1e293b]">Add an endpoint</h2>
+          <p className="mt-1 text-sm text-ink-soft">Public HTTPS URLs only. Pick at least one event.</p>
+          <form onSubmit={onCreate} className="mt-5 space-y-5">
+            <div>
+              <Label>Endpoint URL</Label>
+              <Input type="url" value={url} placeholder="https://your-app.com/hooks/capture" onChange={(e) => setUrl(e.target.value)} required />
+              {duplicate && (
+                <p className="mt-2 flex gap-2 rounded-lg bg-mark-soft px-3 py-2 text-sm text-mark-ink ring-1 ring-[#e8c65a]">
+                  <AlertIcon className="mt-0.5 h-4 w-4 shrink-0" />
+                  Already registered. A second registration gets its own secret, and yours would verify only one of them.
+                </p>
+              )}
+            </div>
+            <fieldset>
+              <legend className="mb-2 text-sm font-medium text-[#1e293b]">Events</legend>
+              <div className="space-y-2">
+                {EVENTS.map((ev) => {
+                  const on = events.includes(ev.id);
+                  return (
+                    <label
+                      key={ev.id}
+                      className={
+                        "flex cursor-pointer items-start gap-3 rounded-xl border bg-white px-3.5 py-3 transition-colors " +
+                        (on ? "border-accent-500 ring-1 ring-accent-500" : "border-control hover:border-ink")
+                      }
+                    >
+                      <input type="checkbox" checked={on} onChange={() => toggle(ev.id)} className="mt-0.5 h-4 w-4 accent-accent-600" />
+                      <span>
+                        <code className="block font-mono text-[13px] font-medium text-ink">{ev.label}</code>
+                        <span className="block text-xs text-ink-soft">{ev.hint}</span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </fieldset>
+            <Button type="submit" className="w-full" loading={creating} disabled={!url.trim() || events.length === 0}>
+              Add webhook
+            </Button>
+          </form>
+        </Card>
+
+        {/* Registered */}
+        <Card className="min-w-0">
+          <Toolbar className="mb-4">
+            <Tabs<EventFilter>
+              value={filter}
+              onChange={setFilter}
+              options={[
+                { id: "all", label: "All", badge: counts.all },
+                ...EVENTS.map((ev) => ({ id: ev.id as EventFilter, label: ev.label, badge: counts[ev.id] })),
+              ]}
+            />
+            <SearchField value={query} onChange={setQuery} placeholder="Search by URL" label="Search webhooks" className="sm:ml-auto" />
+          </Toolbar>
+
+          {loading && hooks.length === 0 ? (
+            <div className="space-y-2" aria-busy="true">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <Skeleton key={i} className="h-20" />
+              ))}
+            </div>
+          ) : hooks.length === 0 ? (
+            <EmptyState art={<HookArt />} title="No webhooks yet" hint="Add an endpoint and results arrive on your server as soon as each parse finishes." />
+          ) : visible.length === 0 ? (
+            <EmptyState
+              art={null}
+              title="No webhooks match"
+              hint="Try another URL or show every event."
+              action={
+                <Button
+                  variant="secondary"
+                  type="button"
+                  onClick={() => {
+                    setQuery("");
+                    setFilter("all");
+                  }}
+                >
+                  Clear filters
+                </Button>
+              }
+            />
+          ) : (
+            <ul className="space-y-3">
+              {visible.map((h) => {
+                const { host, rest } = splitUrl(h.url);
+                const active = h.status !== "inactive" && h.status !== "disabled";
                 return (
-                  <label
-                    key={ev}
-                    className={
-                      "flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors " +
-                      (on ? "border-accent-300 bg-accent-50" : "border-line-strong hover:border-accent-300")
-                    }
-                  >
-                    <input type="checkbox" checked={on} onChange={() => toggle(ev)} className="accent-accent-600" />
-                    <code className="font-mono text-xs text-ink">{ev}</code>
-                  </label>
+                  <li key={h.webhook_id} className="panel-lift rounded-xl bg-white p-4 ring-1 ring-black/[0.04]">
+                    <div className="flex items-start gap-3">
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent-50 text-accent-600">
+                        <WebhookIcon className="h-5 w-5" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1">
+                          <p className="truncate text-[15px] font-semibold text-ink">{host}</p>
+                          <CopyButton text={h.url} label="Copy URL" compact />
+                        </div>
+                        {rest && <p className="truncate font-mono text-xs text-ink-soft">{rest}</p>}
+                        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                          {h.events.map((ev) => (
+                            <span key={ev} className="rounded-full bg-paper px-2.5 py-0.5 font-mono text-[11.5px] text-ink ring-1 ring-inset ring-control">
+                              {ev}
+                            </span>
+                          ))}
+                        </div>
+                        <p className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-soft">
+                          <span className="inline-flex items-center gap-1.5">
+                            <span className={"h-2 w-2 rounded-full " + (active ? "bg-emerald-600" : "bg-ink-soft")} aria-hidden />
+                            {active ? "Receiving events" : h.status}
+                          </span>
+                          <span>
+                            Added <RelativeTime iso={h.created_at} />
+                          </span>
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        className="text-red-700 hover:bg-red-50 hover:text-red-800"
+                        loading={busy === h.webhook_id}
+                        onClick={() => onDelete(h)}
+                        type="button"
+                        aria-label={`Delete webhook ${h.url}`}
+                      >
+                        {busy !== h.webhook_id && <TrashIcon className="h-4 w-4" />}
+                        <span className="hidden sm:inline">Delete</span>
+                      </Button>
+                    </div>
+                  </li>
                 );
               })}
-            </div>
-          </div>
-          <Button type="submit" loading={creating} disabled={!url.trim() || events.length === 0}>Add webhook</Button>
-        </form>
-      </Card>
+            </ul>
+          )}
 
-      <Card>
-        <div className="mb-4 flex items-center justify-between">
-          <SectionTitle>Registered webhooks</SectionTitle>
-          <Button variant="ghost" onClick={load} type="button">Refresh</Button>
-        </div>
-        {loading ? (
-          <div className="flex items-center gap-2 text-sm text-ink-soft"><Spinner /> Loading...</div>
-        ) : hooks.length === 0 ? (
-          <p className="text-sm text-ink-soft">No webhooks registered yet.</p>
-        ) : (
-          <ul className="divide-y divide-line">
-            {hooks.map((h) => (
-              <li key={h.webhook_id} className="flex items-center justify-between gap-4 py-3.5 first:pt-0">
-                <div className="min-w-0">
-                  <div className="truncate font-mono text-sm text-ink">{h.url}</div>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                    {h.events.map((ev) => (
-                      <Badge key={ev} tone="info">{ev}</Badge>
-                    ))}
-                    <span className="text-xs text-ink-soft">· {h.created_at ? new Date(h.created_at).toLocaleDateString() : ""}</span>
-                  </div>
-                </div>
-                <Button variant="danger" loading={busy === h.webhook_id} onClick={() => onDelete(h.webhook_id)} type="button">Delete</Button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
+          {hooks.length > 0 && (
+            <div className="mt-4 flex items-center justify-between text-xs text-ink-soft">
+              <span>
+                Showing {visible.length} of {hooks.length}
+              </span>
+              <button type="button" onClick={load} className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 font-semibold hover:bg-white hover:text-ink">
+                <RefreshIcon className="h-3.5 w-3.5" />
+                Refresh
+              </button>
+            </div>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }
